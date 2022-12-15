@@ -12,7 +12,7 @@ type Route struct {
 	function func(http.ResponseWriter, *http.Request)
 }
 
-func RegisterApi(r *mux.Router) {
+func RegisterRoutes(r *mux.Router) {
 	// Add new routes here
 	routes := []Route{
 		// Views
