@@ -12,14 +12,17 @@ type Route struct {
 	function func(http.ResponseWriter, *http.Request)
 }
 
-func RegisterRoutes(r *mux.Router) {
+func RegisterApi(r *mux.Router) {
 	// Add new routes here
 	routes := []Route{
+		// Views
 		{url: "/", method: "GET", function: homeView},
-		{url: "/posts", method: "GET", function: postListView},
-		{url: "/create", method: "POST", function: createPostView},
-		{url: "/delete/{id}", method: "DELETE", function: deletePostView},
-		{url: "/update/{id}", method: "PUT", function: updatePostView},
+
+		// Api's
+		{url: "/posts", method: "GET", function: postListApi},
+		{url: "/create", method: "POST", function: createPostApi},
+		{url: "/delete/{id}", method: "DELETE", function: deletePostApi},
+		{url: "/update/{id}", method: "PUT", function: updatePostApi},
 	}
 
 	for _, route := range routes {

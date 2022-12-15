@@ -15,7 +15,7 @@ var models = []any{
 
 func init() {
 	var err error
-	db, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	db, err = gorm.Open(sqlite.Open("tofus-blog.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}

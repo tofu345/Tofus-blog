@@ -10,13 +10,13 @@ type BaseModel struct {
 }
 
 type Post struct {
-	BaseModel
 	ID     int    `gorm:"primarykey" json:"id"`
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	Author string `json:"author"`
 	Views  int    `json:"views"`
 	Likes  int    `json:"likes"`
+	BaseModel
 }
 
 type User struct {
