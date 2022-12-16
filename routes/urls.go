@@ -25,6 +25,9 @@ func RegisterRoutes(r *mux.Router) {
 		{url: "/update/{id}", method: "PUT", function: updatePostApi},
 	}
 
+	fs := http.FileServer(http.Dir("./staticfiles/"))
+	r.PathPrefix("/static").Handler(http.StripPrefix("/static", fs))
+
 	for _, route := range routes {
 		r.HandleFunc(route.url, route.function).Methods(route.method)
 	}

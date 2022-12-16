@@ -15,5 +15,5 @@ func init() {
 }
 
 func homeView(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "example.html", nil)
+	renderTemplate(w, r, "welcome.html", nil)
 }
