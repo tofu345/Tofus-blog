@@ -15,5 +15,12 @@ func init() {
 }
 
 func homeView(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, r, "welcome.html", nil)
+	var posts = []backend.Post{}
+	query := db.Find(&posts)
+
+	if query.Error != nil {
+		JSONResponse(w, 103, query.Error, "Error fetching records")
+	}
+
+	renderTemplate(w, r, "post_list.html", map[string]any{"posts": posts, "data": 123})
 }

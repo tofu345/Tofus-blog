@@ -21,6 +21,22 @@ func postListApi(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(w, 100, posts, "Post List")
 }
 
+func postDetailApi(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	post, e := backend.GetPostById(id)
+	if e != nil {
+		JSONResponse(w, 103, nil, "Post Not Found")
+		return
+	}
+
+	JSONResponse(w, 100, post, "Post Detail")
+}
+
 func createPostApi(w http.ResponseWriter, r *http.Request) {
 	var post backend.Post
 	_ = json.NewDecoder(r.Body).Decode(&post)

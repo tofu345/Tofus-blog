@@ -15,9 +15,9 @@ func main() {
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
 
-	routes.RegisterRoutes(r)
+	routes.Register(r)
 
-	log.Print("Listening on port ", port)
+	log.Print("Listening on port http://localhost:", port)
 	log.Fatal(http.ListenAndServe("localhost:"+port, r))
 }
 

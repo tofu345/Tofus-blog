@@ -6,10 +6,16 @@
         <title>{{template "title"}}</title>
         <link rel="stylesheet" href="static/css/main.css" />
         <link rel="icon" href="static/favicon.png" />
+
+        <!-- Tailwind -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- <style type="text/tailwindcss">
+            @layer components {
+            }
+        </style> -->
     </head>
     <body>
-        {{template "body"}}
-        <footer>Made with Go</footer>
+        {{template "body" .}}
     </body>
 </html>
 {{end}}
