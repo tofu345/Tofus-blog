@@ -16,7 +16,7 @@ func init() {
 
 func homeView(w http.ResponseWriter, r *http.Request) {
 	var posts = []backend.Post{}
-	query := db.Find(&posts)
+	query := db.Order("updated_at").Find(&posts)
 
 	if query.Error != nil {
 		JSONResponse(w, 103, query.Error, "Error fetching records")

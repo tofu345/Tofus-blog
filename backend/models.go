@@ -11,7 +11,7 @@ type BaseModel struct {
 
 type Post struct {
 	ID     int    `gorm:"primarykey" json:"id"`
-	Title  string `json:"title"`
+	Title  string `json:"title" gorm:"unique"`
 	Body   string `json:"body"`
 	Author string `json:"author"`
 	Views  int    `json:"views"`

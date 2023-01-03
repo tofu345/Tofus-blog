@@ -1,47 +1,53 @@
 {{define "title"}} Tofus-Blog {{end}}
 <br />
 {{define "body"}}
-<nav class="p-4 w-full flex mx-auto justify-between align-center border-b-2">
-    <a href="/"> My Blog Website </a>
-    <div class="flex flex-row gap-5">
-        <p href="#" class="cursor-pointer">Create</p>
-        <a href="/about"> About </a>
-    </div>
-</nav>
 
-<header class="bg-[#3398E1] p-10 px-[20%] text-white">
-    <p class="text-3xl mb-5">Welcome to my Awesome Blog</p>
-    <p>I love building websites as much as you do!</p>
-</header>
-
-<div>
-    <div class="flex md:flex-row flex-col md:gap-7 max-w-[90%] mx-auto mt-5">
-        <div class="w-full">
-            <!-- Left -->
-            <!-- Post List -->
-            <div>
-                {{range .posts}}
-                <div
-                    class="border-2 rounded-xl p-4 m-2 mb-5 flex flex-col gap-2 relative"
-                >
-                    <h3 class="text-3xl font-medium">{{.Title}}</h3>
-                    <p class="font-light text-gray-500">
-                        {{ .CreatedAt.Format "02 January 2006" }} by {{.Author}}
-                    </p>
-                    <p class="break-all whitespace-pre-line">{{.Body}}</p>
-                </div>
-                {{end}}
-            </div>
+<div class="z-10 relative text-white">
+    <nav
+        class="w-full flex-between py-6 max-w-[85%] mx-auto font-semibold text-lg"
+    >
+        <a href="/">
+            <img
+                class="h-16 rounded-full ease-in duration-150 logo"
+                src="/static/images/logo.png"
+                alt="Tofus-Blog"
+            />
+        </a>
+        <div class="flex flex-row gap-5">
+            <a href="#" class="link h-fit"> Create </a>
         </div>
-        <div class="w-full md:w-[50%]">
-            <div
-                class="w-full border-2 rounded-xl p-4 m-2 mb-5 flex flex-col gap-2 relative"
-            >
-                <h2 class="text-xl pb-2 w-full border-b-2">Your Posts</h2>
-                <p class="italic">work in progress...</p>
+    </nav>
+
+    <div>
+        <div
+            class="text-black flex flex-col-reverse md:flex-row md:gap-7 max-w-[73%] mx-auto mt-5"
+        >
+            <div class="w-full">
+                <!-- Left -->
+                <div>
+                    <!-- Post List -->
+                    {{range .posts}}
+                    <div class="card">
+                        <h3 class="text-3xl font-medium">{{.Title}}</h3>
+                        <p class="font-light text-gray-500">
+                            {{ .CreatedAt.Format "02 January 2006" }} by
+                            {{.Author}}
+                        </p>
+                        <p class="break-all whitespace-pre-line">{{.Body}}</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            <div class="md:w-[45%]">
+                <!-- Right -->
+                <div class="card">
+                    <h2 class="text-xl pb-1 w-full">Your Posts</h2>
+                    <p class="italic">work in progress...</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<script></script>
 {{end}}

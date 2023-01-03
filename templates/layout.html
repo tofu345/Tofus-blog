@@ -4,17 +4,49 @@
     <head>
         <meta charset="utf-8" />
         <title>{{template "title"}}</title>
-        <link rel="stylesheet" href="static/css/main.css" />
+        <!-- <link rel="stylesheet" href="static/css/main.css" /> -->
         <link rel="icon" href="static/favicon.png" />
 
         <!-- Tailwind -->
         <script src="https://cdn.tailwindcss.com"></script>
-        <!-- <style type="text/tailwindcss">
+        <style type="text/tailwindcss">
             @layer components {
+                .background-base {
+                    background: linear-gradient(45deg, #3398e1, #1e81c8);
+                }
+
+                .skew {
+                    transform: skewY(-3deg) translateY(-30px);
+                }
+
+                .flex-between {
+                    display: flex;
+                    justify-content: space-between;
+                }
+
+                .card {
+                    @apply drop-shadow-xl bg-white rounded-lg p-4 m-2 mb-5 flex flex-col gap-2 relative;
+                }
+
+                .link {
+                    @apply border-b-2 border-transparent hover:border-white ease-in duration-150;
+                }
+
+                .logo {
+                    transform: scale(2) translateY(-10px);
+                }
+
+                .logo:hover {
+                    transform: scale(2.2) translateY(-10px);
+                }
             }
-        </style> -->
+        </style>
     </head>
     <body>
+        <div
+            class="background-base skew z-0 p-5 text-white font-bold h-[54%] sm:h-[400px] w-full absolute top-[-3%] right-0"
+        ></div>
+
         {{template "body" .}}
     </body>
 </html>
