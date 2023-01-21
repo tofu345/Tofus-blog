@@ -24,6 +24,8 @@ func Register(r *mux.Router) {
 		{url: "/create", methods: []string{"POST"}, function: createPostApi},
 		{url: "/delete/{id}", methods: []string{"DELETE"}, function: deletePostApi},
 		{url: "/update/{id}", methods: []string{"PUT"}, function: updatePostApi},
+
+		{url: "/signup", methods: []string{"POST"}, function: signUpApi},
 	}
 
 	// Static Files

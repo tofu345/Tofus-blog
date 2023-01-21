@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -31,7 +32,11 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 	})
 }
 
-func renderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, data any) {
+func parseFiles(funcs template.FuncMap, filenames ...string) (*template.Template, error) {
+	return template.New(filepath.Base(filenames[0])).Funcs(funcs).ParseFiles(filenames...)
+}
+
+func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, data any) {
 	baseTemplateDir := "templates"
 
 	lp := filepath.Join(baseTemplateDir, "layout.html")
@@ -54,7 +59,18 @@ func renderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 		return
 	}
 
-	tmpl, err := template.ParseFiles(lp, fp)
+	// Template Functions
+	funcs := template.FuncMap{
+		"truncateStr": func(text string) string {
+			max := 500
+			if max > len(text) {
+				return text
+			}
+			return text[:strings.LastIndex(text[:max], " ")] + "..."
+		},
+	}
+
+	tmpl, err := parseFiles(funcs, lp, fp)
 	if err != nil {
 		// Log the detailed error
 		log.Print(err.Error())

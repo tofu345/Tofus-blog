@@ -21,8 +21,10 @@ type Post struct {
 
 type User struct {
 	BaseModel
+	ID        int    `gorm:"primarykey" json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Username  string `json:"username"`
+	Username  string `json:"username" gorm:"unique"`
+	Password  string `json:"password"`
 	Email     string `json:"email"`
 }

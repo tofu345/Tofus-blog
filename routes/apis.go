@@ -30,7 +30,7 @@ func postDetailApi(w http.ResponseWriter, r *http.Request) {
 
 	post, e := backend.GetPostById(id)
 	if e != nil {
-		JSONResponse(w, 103, nil, "Post Not Found")
+		JSONResponse(w, 103, e, "Post Not Found")
 		return
 	}
 
@@ -40,11 +40,16 @@ func postDetailApi(w http.ResponseWriter, r *http.Request) {
 func createPostApi(w http.ResponseWriter, r *http.Request) {
 	var post backend.Post
 	_ = json.NewDecoder(r.Body).Decode(&post)
-	err_map, err := backend.CreatePost(post)
-	if err != nil {
-		JSONResponse(w, 103, err_map, err.Error())
+
+	err_map := post.Errors()
+	if len(err_map) == 0 {
+		if result := db.Create(&post); result.Error != nil {
+			JSONResponse(w, 103, result.Error.Error(), "Error Creating Post")
+		} else {
+			JSONResponse(w, 100, post, "Post Created Successfully")
+		}
 	} else {
-		JSONResponse(w, 100, post, "Post Created Successfully")
+		JSONResponse(w, 103, err_map, "Data Invalid")
 	}
 }
 
@@ -71,7 +76,7 @@ func updatePostApi(w http.ResponseWriter, r *http.Request) {
 	// Check if post exists
 	post, e := backend.GetPostById(id)
 	if e != nil {
-		JSONResponse(w, 103, nil, "Post Not Found")
+		JSONResponse(w, 103, e, "Post Not Found")
 		return
 	}
 
@@ -84,5 +89,30 @@ func updatePostApi(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(w, 100, post, "Post Updated Successfully")
 	} else {
 		JSONResponse(w, 103, errs, "Error Updating Post")
+	}
+}
+
+// TODO Sign up and sign in api views
+func signUpApi(w http.ResponseWriter, r *http.Request) {
+	var user backend.User
+	_ = json.NewDecoder(r.Body).Decode(&user)
+
+	err_map := user.Errors()
+	if len(err_map) == 0 {
+		// Hash Password
+		if password, err := backend.HashPassword(user.Password); err != nil {
+			JSONResponse(w, 103, err, "Error")
+			return
+		} else {
+			user.Password = password
+		}
+
+		if result := db.Create(&user); result.Error != nil {
+			JSONResponse(w, 103, result.Error.Error(), "Error Creating User")
+		} else {
+			JSONResponse(w, 100, user, "User Created Successfully")
+		}
+	} else {
+		JSONResponse(w, 103, err_map, "Data Invalid")
 	}
 }
