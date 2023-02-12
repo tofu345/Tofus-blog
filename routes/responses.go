@@ -16,6 +16,16 @@ type Response struct {
 	Data         any    `json:"data"`
 }
 
+type TemplateConfig struct {
+	NavbarShown     bool
+	BackgroundShown bool
+}
+
+var DefaultTemplateConfig = &TemplateConfig{
+	NavbarShown:     true,
+	BackgroundShown: true,
+}
+
 func JSONResponse(w http.ResponseWriter, responseCode int, data any, message string) {
 	w.Header().Set("Content-type", "application/json")
 
@@ -36,7 +46,9 @@ func parseFiles(funcs template.FuncMap, filenames ...string) (*template.Template
 	return template.New(filepath.Base(filenames[0])).Funcs(funcs).ParseFiles(filenames...)
 }
 
-func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, data any) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, data map[string]any, config *TemplateConfig) {
+	data["template_config"] = *config
+
 	baseTemplateDir := "templates"
 
 	lp := filepath.Join(baseTemplateDir, "layout.html")
@@ -67,6 +79,12 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 				return text
 			}
 			return text[:strings.LastIndex(text[:max], " ")] + "..."
+		},
+		"ls_eq": func(num1, num2 int) bool {
+			return num1 <= num2
+		},
+		"gt": func(num1, num2 int) bool {
+			return num1 > num2
 		},
 	}
 

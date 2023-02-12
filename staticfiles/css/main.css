@@ -1,3 +1,18 @@
 /* body {
     color: #c0392b;
 } */
+
+input[type="checkbox"]:checked + label.dropdown-wrapper > svg.open,
+input[type="checkbox"]:not(:checked) + label.dropdown-wrapper > svg.close {
+    display: none;
+}
+
+input[type="checkbox"]:not(:checked)
+    + label.dropdown-wrapper
+    ~ .dropdown-options {
+    display: none;
+}
+
+/* input[type="checkbox"]:checked + label.dropdown-wrapper {
+    background: rgb(229 231 235);
+} */

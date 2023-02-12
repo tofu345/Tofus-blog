@@ -1,10 +1,13 @@
 package routes
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 
-	"tofus-blog/backend"
+	"tofs-blog/backend"
 
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -16,11 +19,38 @@ func init() {
 
 func homeView(w http.ResponseWriter, r *http.Request) {
 	var posts = []backend.Post{}
-	query := db.Order("updated_at").Find(&posts)
+	query := db.Find(&posts).Order("updated_at")
+
+	// Reverse the list
+	// Couldnt think of any better way to sort by last updated first
+	// but to do it on the frontend
+	j := len(posts) - 1
+	for i := 0; i < j; i++ {
+		posts[i], posts[j] = posts[j], posts[i]
+		j--
+	}
 
 	if query.Error != nil {
 		JSONResponse(w, 103, query.Error, "Error fetching records")
 	}
 
-	RenderTemplate(w, r, "post_list.html", map[string]any{"posts": posts, "data": 123})
+	RenderTemplate(w, r, "posts/post_list.html",
+		map[string]any{"posts": posts, "data": 123}, DefaultTemplateConfig)
+}
+
+// TODO use slugs instead of ids in url
+func postDetailView(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	post, e := backend.GetPostById(id)
+	if e != nil {
+		JSONResponse(w, 103, e, "Post Not Found")
+		return
+	}
+
+	RenderTemplate(w, r, "posts/post_detail.html", map[string]any{"post": post}, DefaultTemplateConfig)
 }

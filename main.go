@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"tofus-blog/routes"
+	"tofs-blog/routes"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"

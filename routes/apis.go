@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"tofus-blog/backend"
+	"tofs-blog/backend"
 
 	"github.com/gorilla/mux"
 )
