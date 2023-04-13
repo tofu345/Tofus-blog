@@ -1,9 +1,7 @@
 package routes
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 
 	"tofs-blog/backend"
 
@@ -38,15 +36,11 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 		map[string]any{"posts": posts, "data": 123}, DefaultTemplateConfig)
 }
 
-// TODO use slugs instead of ids in url
 func postDetailView(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		log.Fatal(err)
-	}
+	slug := params["slug"]
 
-	post, e := backend.GetPostById(id)
+	post, e := backend.GetPostBySlug(slug)
 	if e != nil {
 		JSONResponse(w, 103, e, "Post Not Found")
 		return

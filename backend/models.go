@@ -10,13 +10,21 @@ type BaseModel struct {
 }
 
 type Post struct {
-	ID     int    `gorm:"primarykey" json:"id"`
-	Title  string `json:"title" gorm:"unique"`
-	Body   string `json:"body"`
-	Author string `json:"author"`
-	Views  int    `json:"views"`
-	Likes  int    `json:"likes"`
+	ID       int       `gorm:"primarykey" json:"id"`
+	Title    string    `json:"title" gorm:"unique"`
+	Slug     string    `json:"slug"`
+	Body     string    `json:"body"`
+	Author   string    `json:"author"`
+	Views    int       `json:"views"`
+	Likes    int       `json:"likes"`
+	Comments []Comment `json:"comments" gorm:"foreignKey:ID"`
 	BaseModel
+}
+
+type Comment struct {
+	ID      int    `gorm:"primarykey" json:"id"`
+	Author  string `json:"author"`
+	Message string `json:"message"`
 }
 
 type User struct {

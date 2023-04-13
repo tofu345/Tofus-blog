@@ -1,9 +1,13 @@
 package backend
 
-import "errors"
-
 func GetPostById(object_id int) (Post, error) {
 	var post = Post{ID: object_id}
+	result := db.First(&post)
+	return post, result.Error
+}
+
+func GetPostBySlug(slug string) (Post, error) {
+	var post = Post{Slug: slug}
 	result := db.First(&post)
 	return post, result.Error
 }
@@ -30,18 +34,4 @@ func (post *Post) Errors() map[string]string {
 	}
 
 	return errors
-}
-
-// Creates Post and returns errors
-func CreatePost(post Post) (map[string]string, error) {
-	postErrors := post.Errors()
-	if len(postErrors) == 0 {
-		if result := db.Create(&post); result.Error != nil {
-			return postErrors, errors.New("error creating post")
-		} else {
-			return postErrors, nil
-		}
-	} else {
-		return postErrors, errors.New("post data invalid")
-	}
 }

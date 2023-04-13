@@ -12,6 +12,7 @@ var db *gorm.DB
 var models = []any{
 	&Post{},
 	&User{},
+	&Comment{},
 }
 
 func init() {

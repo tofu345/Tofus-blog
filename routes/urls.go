@@ -21,12 +21,13 @@ func Register(r *mux.Router) {
 		// Api's
 		{url: "/api/posts", methods: []string{"GET"}, function: postListApi},
 		{url: "/api/posts/{id}", methods: []string{"GET"}, function: postDetailApi},
+		{url: "/api/post/{id}/comments", methods: []string{"POST"}, function: createCommentApi},
 		{url: "/api/create", methods: []string{"POST"}, function: createPostApi},
 		{url: "/api/delete/{id}", methods: []string{"DELETE"}, function: deletePostApi},
 		{url: "/api/update/{id}", methods: []string{"PUT"}, function: updatePostApi},
 
 		{url: "/signup", methods: []string{"POST"}, function: signUpApi},
-		{url: "/posts/{id}", methods: []string{"GET"}, function: postDetailView},
+		{url: "/posts/{slug}", methods: []string{"GET"}, function: postDetailView},
 	}
 
 	// Static Files
