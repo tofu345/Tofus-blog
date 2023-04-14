@@ -1,50 +1,47 @@
 package routes
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
-	"tofs-blog/backend"
+	"tofs-blog/posts"
 
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-func init() {
-	db = backend.GetDB()
-}
-
 func homeView(w http.ResponseWriter, r *http.Request) {
-	var posts = []backend.Post{}
-	query := db.Find(&posts).Order("updated_at")
+	objects, err := posts.GetAll()
+	if err != nil {
+		ErrorResponse(w, r, err, nil)
+	}
 
-	// Reverse the list
-	// Couldnt think of any better way to sort by last updated first
-	// but to do it on the frontend
-	j := len(posts) - 1
+	// ? Reverse list on front end instead
+	j := len(objects) - 1
 	for i := 0; i < j; i++ {
-		posts[i], posts[j] = posts[j], posts[i]
+		objects[i], objects[j] = objects[j], objects[i]
 		j--
 	}
 
-	if query.Error != nil {
-		JSONResponse(w, 103, query.Error, "Error fetching records")
-	}
-
 	RenderTemplate(w, r, "posts/post_list.html",
-		map[string]any{"posts": posts, "data": 123}, DefaultTemplateConfig)
+		map[string]any{"posts": objects, "data": 123}, NewTemplateConfig())
+}
+
+func NotFound404Handler(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, r, "error.html",
+		map[string]any{"data": fmt.Sprintf("The page %v was not found", r.URL), "err": "404 Not Found"}, &TemplateConfig{})
 }
 
 func postDetailView(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	slug := params["slug"]
 
-	post, e := backend.GetPostBySlug(slug)
+	post, e := posts.GetBySlug(slug)
 	if e != nil {
-		JSONResponse(w, 103, e, "Post Not Found")
+		ErrorResponse(w, r, errors.New("Post Not Found"), fmt.Sprintf("No post with slug %v was found", slug))
 		return
 	}
 
-	RenderTemplate(w, r, "posts/post_detail.html", map[string]any{"post": post}, DefaultTemplateConfig)
+	RenderTemplate(w, r, "posts/post_detail.html",
+		map[string]any{"post": post}, NewTemplateConfig())
 }

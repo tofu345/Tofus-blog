@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -21,11 +22,14 @@ type TemplateConfig struct {
 	BackgroundShown bool
 }
 
-var DefaultTemplateConfig = &TemplateConfig{
-	NavbarShown:     true,
-	BackgroundShown: true,
+func NewTemplateConfig() *TemplateConfig {
+	return &TemplateConfig{
+		NavbarShown:     true,
+		BackgroundShown: true,
+	}
 }
 
+// responseCode: 103 - Bad, 100 - Good
 func JSONResponse(w http.ResponseWriter, responseCode int, data any, message string) {
 	w.Header().Set("Content-type", "application/json")
 
@@ -40,6 +44,21 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 		Data:         data,
 		Message:      message,
 	})
+}
+
+// Renders error page
+func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, data any) {
+	log.Println(err)
+
+	RenderTemplate(w, r, "error.html",
+		map[string]any{"data": data, "err": err.Error()}, &TemplateConfig{})
+}
+
+// Decodes request body into data
+//
+// data should be a pointer
+func JSONDecode(r *http.Request, data any) error {
+	return json.NewDecoder(r.Body).Decode(data)
 }
 
 func parseFiles(funcs template.FuncMap, filenames ...string) (*template.Template, error) {
@@ -80,11 +99,24 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 			}
 			return text[:strings.LastIndex(text[:max], " ")] + "..."
 		},
-		"ls_eq": func(num1, num2 int) bool {
+		"ls_or_eq": func(num1, num2 int) bool {
 			return num1 <= num2
 		},
 		"gt": func(num1, num2 int) bool {
 			return num1 > num2
+		},
+		"fmt_likes": func(likes int) string {
+			// < 1k
+			if likes <= 999 {
+				return fmt.Sprint(likes)
+			}
+
+			// < 1m
+			if likes <= 999999 {
+				return fmt.Sprintf("%dK", likes/1000)
+			}
+
+			return fmt.Sprintf("%dM", likes/1000000)
 		},
 	}
 

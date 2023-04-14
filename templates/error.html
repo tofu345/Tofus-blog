@@ -1,0 +1,12 @@
+{{ define "title" }} Tofus Blog - Posts {{ end }}
+<br />
+{{ define "body" }}
+<div class="flex h-screen">
+    <div
+        class="m-auto drop-shadow-xl background-base rounded-lg p-3 w-[70%] h-[50%]"
+    >
+        <h3 class="pb-2 font-bold text-3xl">{{ .err }}</h3>
+        <p>{{ .data }}</p>
+    </div>
+</div>
+{{end}}

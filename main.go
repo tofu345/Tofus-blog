@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// ! Have post likes be positioned with grid not padding
+
 func main() {
 	port := "8005"
 	r := mux.NewRouter()

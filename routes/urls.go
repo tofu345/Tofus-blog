@@ -37,4 +37,7 @@ func Register(r *mux.Router) {
 	for _, route := range routes {
 		r.HandleFunc(route.url, route.function).Methods(route.methods...)
 	}
+
+	// Custom 404 Handler
+	r.NotFoundHandler = http.HandlerFunc(NotFound404Handler)
 }

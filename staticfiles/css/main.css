@@ -2,15 +2,23 @@
     color: #c0392b;
 } */
 
-input[type="checkbox"]:checked + label.dropdown-wrapper > svg.open,
-input[type="checkbox"]:not(:checked) + label.dropdown-wrapper > svg.close {
+/* Keep dropdown shown */
+input[type="checkbox"]:checked + label.dropdown-toggle > svg.open,
+input[type="checkbox"]:not(:checked) + label.dropdown-toggle > svg.close {
+    display: none;
+}
+input[type="checkbox"]:not(:checked)
+    + label.dropdown-toggle
+    ~ .dropdown-options {
     display: none;
 }
 
-input[type="checkbox"]:not(:checked)
-    + label.dropdown-wrapper
-    ~ .dropdown-options {
+/* Shown dropdown toggle */
+div.dropdown-toggle-wrapper {
     display: none;
+}
+div:hover > div.dropdown-toggle-wrapper {
+    display: block;
 }
 
 /* input[type="checkbox"]:checked + label.dropdown-wrapper {
