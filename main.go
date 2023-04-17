@@ -11,8 +11,11 @@ import (
 )
 
 // ! Have post likes be positioned with grid not padding
+// ? Change db error messages
 
 func main() {
+	log.Println("Starting...")
+
 	port := "8005"
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)

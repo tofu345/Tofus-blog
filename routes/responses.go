@@ -7,8 +7,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/gorilla/mux"
 )
 
 type Response struct {
@@ -20,6 +23,17 @@ type Response struct {
 type TemplateConfig struct {
 	NavbarShown     bool
 	BackgroundShown bool
+}
+
+const (
+	InvalidURL      = "Invalid URL"
+	InvalidPOSTData = "Invalid POST Data"
+	InvalidData     = "Invalid Data"
+)
+
+func getIdFromRequest(req *http.Request) (int, error) {
+	vars := mux.Vars(req)
+	return strconv.Atoi(vars["id"])
 }
 
 func NewTemplateConfig() *TemplateConfig {
@@ -105,7 +119,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 		"gt": func(num1, num2 int) bool {
 			return num1 > num2
 		},
-		"fmt_likes": func(likes int) string {
+		"fmt_likes": func(likes uint64) string {
 			// < 1k
 			if likes <= 999 {
 				return fmt.Sprint(likes)

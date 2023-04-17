@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"tofs-blog/posts"
+	"tofs-blog/db"
 
 	"github.com/gorilla/mux"
 )
 
 func homeView(w http.ResponseWriter, r *http.Request) {
-	objects, err := posts.GetAll()
+	objects := []db.Post{}
+	err := db.Get(&objects)
 	if err != nil {
 		ErrorResponse(w, r, err, nil)
+		return
 	}
 
 	// ? Reverse list on front end instead
@@ -23,8 +25,15 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 		j--
 	}
 
-	RenderTemplate(w, r, "posts/post_list.html",
-		map[string]any{"posts": objects, "data": 123}, NewTemplateConfig())
+	cookie, err := r.Cookie("firstName")
+	if err != nil {
+		ErrorResponse(w, r, nil, "not implemented")
+		return
+	}
+
+	fmt.Println(cookie.Name, cookie.Value)
+
+	RenderTemplate(w, r, "posts/post_list.html", map[string]any{"posts": objects}, NewTemplateConfig())
 }
 
 func NotFound404Handler(w http.ResponseWriter, r *http.Request) {
@@ -36,8 +45,8 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	slug := params["slug"]
 
-	post, e := posts.GetBySlug(slug)
-	if e != nil {
+	post, err := db.GetPostBySlug(slug)
+	if err != nil {
 		ErrorResponse(w, r, errors.New("Post Not Found"), fmt.Sprintf("No post with slug %v was found", slug))
 		return
 	}
