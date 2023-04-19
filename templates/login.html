@@ -1,0 +1,85 @@
+{{ define "title" }} Tofus Blog - Login {{ end }}
+<br />
+{{ define "body" }}
+<div class="flex h-screen">
+    <div
+        class="m-auto drop-shadow-xl background-base rounded-lg p-2 w-[50%] h-[60%]"
+    >
+        <div class="text-black flex h-full">
+            <div class="w-full h-full xl:block hidden">
+                <!-- Left -->
+            </div>
+            <div class="w-full h-full rounded-lg bg-white">
+                <!-- Right -->
+                <div class="flex h-full">
+                    <form
+                        method="POST"
+                        class="my-auto mx-[10%] w-full text-black"
+                        id="login-form"
+                    >
+                        <div class="mx-auto w-fit h-full pb-10">
+                            <img
+                                class="h-32 rounded-full border"
+                                src="/static/images/logo.png"
+                                alt="Tofus-Blog"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                for="email"
+                                class="block mb-2 text-sm text-gray-900"
+                            >
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                class="bg-gray-50 border text-gray-900 rounded-lg focus:border-[#3398e1] w-full p-2.5 mb-2"
+                                placeholder="name@email.com"
+                                required="true"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                for="password"
+                                class="block mb-2 text-sm text-gray-900"
+                            >
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                placeholder="••••••••••••••••"
+                                class="bg-gray-50 border text-gray-900 rounded-lg focus:border-[#3398e1] w-full p-2.5"
+                                required="true"
+                            />
+                        </div>
+                        <p
+                            id="login-error"
+                            class="inline-block text-sm text-red-500"
+                        ></p>
+                        <button
+                            type="submit"
+                            class="mt-1 w-full text-black border hover:bg-primary-700 hover:background-base hover:text-white focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                        >
+                            Sign in
+                        </button>
+                        <p class="mt-1 text-sm font-light text-gray-500">
+                            Don’t have an account yet?
+                            <a
+                                href="/signup"
+                                class="font-medium text-primary-600 hover:underline"
+                                >Sign up</a
+                            >
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/login.js"></script>
+{{end}}

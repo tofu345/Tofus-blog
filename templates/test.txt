@@ -1,8 +1,0 @@
-<!-- <div class="max-w-[70%] mx-auto mt-8 lg:flex-between">
-        <div class="flex flex-col gap-5">
-            <h3 class="font-bold text-4xl">Welcome to my Awesome blog</h3>
-            <h3 class="font-semibold text-2xl">
-                I love building websites as much as you do!
-            </h3>
-        </div>
-    </div> -->

@@ -14,8 +14,6 @@ import (
 // ? Change db error messages
 
 func main() {
-	log.Println("Starting...")
-
 	port := "8005"
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)

@@ -15,16 +15,19 @@ func Get(obj any) error {
 	return query.Error
 }
 
+// model should be a pointer
 func Update(model any) error {
 	result := DB.Save(model)
 	return result.Error
 }
 
+// model should be a pointer
 func Create(model any) error {
 	result := DB.Create(model)
 	return result.Error
 }
 
+// model should be a pointer
 func Delete(model any) error {
 	result := DB.Delete(model)
 	return result.Error

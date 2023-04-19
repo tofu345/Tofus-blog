@@ -1,14 +1,30 @@
 package db
 
+import (
+	"time"
+)
+
 type User struct {
+	ID              int       `gorm:"primarykey" json:"id"`
+	FirstName       string    `json:"first_name"`
+	LastName        string    `json:"last_name"`
+	Username        string    `json:"username" gorm:"unique"`
+	Password        string    `json:"password"`
+	Email           string    `json:"email" gorm:"unique"`
+	AccessToken     string    `json:"-" gorm:"unique"` // Exclude from JSON serialization
+	TokenExpiryDate time.Time `json:"-"`
 	BaseModel
-	ID          int    `gorm:"primarykey" json:"id"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Username    string `json:"username" gorm:"unique"`
-	Password    string `json:"password"`
-	Email       string `json:"email" gorm:"unique"`
-	AccessToken string `json:"-" gorm:"unique"`
+}
+
+func GetUser(user *User) error {
+	result := DB.First(&user, "email = ?", user.Email)
+	return result.Error
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	result := DB.First(&user, "email = ?", email)
+	return &user, result.Error
 }
 
 func (user *User) Errors() map[string]string {

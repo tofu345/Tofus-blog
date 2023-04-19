@@ -25,13 +25,14 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 		j--
 	}
 
-	cookie, err := r.Cookie("firstName")
-	if err != nil {
-		ErrorResponse(w, r, nil, "not implemented")
-		return
-	}
+	// Check for cookie
+	// cookie, err := r.Cookie("firstName")
+	// if err != nil {
+	// 	ErrorResponse(w, r, err, "not implemented")
+	// 	return
+	// }
 
-	fmt.Println(cookie.Name, cookie.Value)
+	// fmt.Println(cookie.Name, cookie.Value)
 
 	RenderTemplate(w, r, "posts/post_list.html", map[string]any{"posts": objects}, NewTemplateConfig())
 }
@@ -53,4 +54,8 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 
 	RenderTemplate(w, r, "posts/post_detail.html",
 		map[string]any{"post": post}, NewTemplateConfig())
+}
+
+func loginView(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, r, "login.html", map[string]any{}, &TemplateConfig{})
 }

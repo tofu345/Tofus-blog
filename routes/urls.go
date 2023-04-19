@@ -27,10 +27,10 @@ func Register(r *mux.Router) {
 		{url: "/api/update/{id}", methods: []string{"PUT"}, function: updatePostApi},
 
 		{url: "/api/users", methods: []string{"GET"}, function: userListApi},
+		{url: "/signup", methods: []string{"POST"}, function: userSignupApi},
+		{url: "/login", methods: []string{"POST"}, function: userLoginApi},
 
-		{url: "/posts/{id}/likes", methods: []string{"POST"}, function: votePostApi},
-
-		{url: "/signup", methods: []string{"POST"}, function: signUpApi},
+		{url: "/login", methods: []string{"GET"}, function: loginView},
 		{url: "/posts/{slug}", methods: []string{"GET"}, function: postDetailView},
 	}
 

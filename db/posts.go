@@ -1,7 +1,6 @@
 package db
 
 type Post struct {
-	BaseModel
 	ID       int       `gorm:"primarykey" json:"id"`
 	Title    string    `json:"title" gorm:"unique"`
 	Slug     string    `json:"slug"  gorm:"unique"`
@@ -10,6 +9,7 @@ type Post struct {
 	Views    int       `json:"views"`
 	Likes    uint64    `json:"likes"`
 	Comments []Comment `json:"comments" gorm:"foreignKey:ID"`
+	BaseModel
 }
 
 func GetPostBySlug(slug string) (Post, error) {

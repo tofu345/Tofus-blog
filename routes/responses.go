@@ -62,7 +62,7 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 
 // Renders error page
 func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, data any) {
-	log.Println(err)
+	log.Println("Error: " + err.Error())
 
 	RenderTemplate(w, r, "error.html",
 		map[string]any{"data": data, "err": err.Error()}, &TemplateConfig{})

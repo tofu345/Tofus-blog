@@ -9,6 +9,8 @@ import (
 )
 
 func postListApi(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
 	postList := []db.Post{}
 	err := db.Get(&postList)
 	if err != nil {
@@ -20,6 +22,8 @@ func postListApi(w http.ResponseWriter, r *http.Request) {
 }
 
 func postDetailApi(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
 	id, err := getIdFromRequest(r)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), InvalidURL)
@@ -37,6 +41,8 @@ func postDetailApi(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPostApi(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
 	var post db.Post
 	err := JSONDecode(r, &post)
 	if err != nil {
@@ -145,76 +151,35 @@ func createCommentApi(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(w, 100, post, "Success")
 }
 
-func votePostApi(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-	id, err := getIdFromRequest(r)
-	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
-		return
-	}
-
-	post := db.Post{ID: id}
-	err = db.Get(&post)
-	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Post Not Found")
-		return
-	}
-
-	data := make(map[string]string)
-	err = JSONDecode(r, &data)
+func userSignupApi(w http.ResponseWriter, r *http.Request) {
+	var user db.User
+	err := JSONDecode(r, &user)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), InvalidPOSTData)
 		return
 	}
 
-	if _, exists := data["vote"]; !exists {
-		JSONResponse(w, 103, "Vote option must be present", InvalidPOSTData)
-		return
-	}
-
-	if data["vote"] == "like" {
-		post.Likes++
-	} else if data["vote"] == "dislike" {
-		post.Likes--
-	} else {
-		JSONResponse(w, 103, fmt.Sprintf("%v is not a valid option", data["vote"]), InvalidPOSTData)
-		return
-	}
-
-	db.Update(post)
-	JSONResponse(w, 100, post, "Vote Successful")
-}
-
-// TODO Sign up and sign in api views
-func signUpApi(w http.ResponseWriter, r *http.Request) {
-	var userObj db.User
-	err := JSONDecode(r, &userObj)
-	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
-		return
-	}
-
-	err_map := userObj.Errors()
+	err_map := user.Errors()
 	if len(err_map) != 0 {
 		JSONResponse(w, 103, err_map, InvalidData)
 		return
 	}
 
 	var pswd string
-	pswd, err = db.HashPassword(userObj.Password)
+	pswd, err = db.HashPassword(user.Password)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), "Error Creating Password Hash")
 		return
 	}
-	userObj.Password = pswd
+	user.Password = pswd
 
-	err = db.Create(userObj)
+	err = db.Create(&user)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), "Error Creating User")
 		return
 	}
 
-	JSONResponse(w, 100, userObj, "Success")
+	JSONResponse(w, 100, user, "Success")
 }
 
 func userListApi(w http.ResponseWriter, r *http.Request) {
@@ -226,4 +191,61 @@ func userListApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse(w, 100, users, "User List")
+}
+
+// Check username and password
+// Generate token and token expiry date and store
+// return token
+func userLoginApi(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
+	userData := make(map[string]string)
+	err := JSONDecode(r, &userData)
+	if err != nil {
+		JSONResponse(w, 103, err.Error(), InvalidPOSTData)
+		return
+	}
+
+	errors := map[string]string{}
+	if _, exists := userData["email"]; exists == false {
+		errors["email"] = "This field is required"
+	}
+	if _, exists := userData["password"]; exists == false {
+		errors["password"] = "This field is required"
+	}
+	if len(errors) != 0 {
+		JSONResponse(w, 103, errors, InvalidData)
+		return
+	}
+
+	user, err := db.GetUserByEmail(userData["email"])
+	if err != nil {
+		JSONResponse(w, 103, err.Error(), "Error")
+		return
+	}
+
+	pwsd, err := db.HashPassword(userData["password"])
+	if err != nil {
+		JSONResponse(w, 103, "Could not hash user password", "Error")
+		return
+	}
+
+	fmt.Println(pwsd, user.Password, userData["password"])
+
+	// ! Hashed passwords are never the same :(
+
+	if pwsd != user.Password {
+		JSONResponse(w, 103, "Incorrect Password", "Error")
+		return
+	}
+
+	user.AccessToken = db.GenerateToken(user.Email)
+
+	err = db.Update(&user)
+	if err != nil {
+		JSONResponse(w, 103, "Error generating token", "Error")
+		return
+	}
+
+	JSONResponse(w, 100, map[string]any{"user": user, "token": user.AccessToken}, "Success")
 }
