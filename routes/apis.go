@@ -56,7 +56,7 @@ func createPostApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Create(post)
+	err = db.Create(&post)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), "Error Creating Post")
 		return
@@ -110,7 +110,7 @@ func updatePostApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Update(post)
+	err = db.Update(&post)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), "Error Updating Post")
 		return
@@ -142,7 +142,7 @@ func createCommentApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post.Comments = append(post.Comments, comment)
-	err = db.Update(post)
+	err = db.Update(&post)
 	if err != nil {
 		JSONResponse(w, 103, err.Error(), "Error Updating Post")
 		return
