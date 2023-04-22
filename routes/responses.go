@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
+	"tofs-blog/db"
 
 	"github.com/gorilla/mux"
 )
@@ -21,14 +24,18 @@ type Response struct {
 }
 
 type TemplateConfig struct {
-	NavbarShown     bool
-	BackgroundShown bool
+	NavbarShown bool
 }
 
 const (
+	baseUrl = "http://localhost:8005"
+
 	InvalidURL      = "Invalid URL"
 	InvalidPOSTData = "Invalid POST Data"
 	InvalidData     = "Invalid Data"
+
+	NoTokenFound = "No Token"
+	TokenExpired = "Token Expired"
 )
 
 func getIdFromRequest(req *http.Request) (int, error) {
@@ -36,10 +43,62 @@ func getIdFromRequest(req *http.Request) (int, error) {
 	return strconv.Atoi(vars["id"])
 }
 
+// ? unnecessary right now
+// func formatDbError(errPtr *error) {
+// 	err := *errPtr
+// 	switch err.Error() {
+// 	case "record not found":
+
+// 	}
+// }
+
+// Uses user token to get logged in user
+// returns empty user object if not logged in
+func getUserFromRequest(w http.ResponseWriter, r *http.Request) (db.User, error) {
+	token, err := r.Cookie("token")
+	if err != nil {
+		return db.User{}, errors.New(NoTokenFound)
+	}
+
+	user, err := db.GetUserByToken(token.Value)
+	if err != nil {
+		if err.Error() == db.RecordNotFound {
+			err = errors.New(NoTokenFound)
+		}
+
+		return db.User{}, err
+	}
+
+	currentTime := time.Now()
+	if user.TokenExpiryDate.Before(currentTime) {
+		return db.User{}, errors.New(TokenExpired)
+	}
+
+	return user, nil
+}
+
+// redirects to login page if not logged in and renders error page if user not found or any other error
+func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (db.User, error) {
+	user, err := getUserFromRequest(w, r)
+	if err == nil {
+		return user, err
+	}
+
+	if err.Error() == NoTokenFound || err.Error() == TokenExpired {
+		url := fmt.Sprintf("%v/login?next=%v", baseUrl, r.URL)
+		http.Redirect(w, r, url, http.StatusSeeOther)
+	} else {
+		ErrorResponse(w, r, err, "Error")
+	}
+
+	fmt.Println(err.Error())
+
+	return user, err
+}
+
 func NewTemplateConfig() *TemplateConfig {
 	return &TemplateConfig{
-		NavbarShown:     true,
-		BackgroundShown: true,
+		NavbarShown: true,
 	}
 }
 
@@ -81,6 +140,10 @@ func parseFiles(funcs template.FuncMap, filenames ...string) (*template.Template
 
 func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, data map[string]any, config *TemplateConfig) {
 	data["template_config"] = *config
+	// Add user object if not exists
+	if _, exists := data["user"]; !exists {
+		data["user"], _ = getUserFromRequest(w, r)
+	}
 
 	baseTemplateDir := "templates"
 
@@ -131,6 +194,9 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 			}
 
 			return fmt.Sprintf("%dM", likes/1000000)
+		},
+		"userLoggedIn": func(user db.User) bool {
+			return user != db.User{}
 		},
 	}
 

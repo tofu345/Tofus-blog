@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
+	"time"
 	"tofs-blog/db"
 
 	"github.com/gosimple/slug"
@@ -224,22 +224,13 @@ func userLoginApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pwsd, err := db.HashPassword(userData["password"])
-	if err != nil {
-		JSONResponse(w, 103, "Could not hash user password", "Error")
-		return
-	}
-
-	fmt.Println(pwsd, user.Password, userData["password"])
-
-	// ! Hashed passwords are never the same :(
-
-	if pwsd != user.Password {
+	if !db.CheckPasswordHash(userData["password"], user.Password) {
 		JSONResponse(w, 103, "Incorrect Password", "Error")
 		return
 	}
 
 	user.AccessToken = db.GenerateToken(user.Email)
+	user.TokenExpiryDate = time.Now().Add(7 * 24 * time.Hour) // Expires in 7 days
 
 	err = db.Update(&user)
 	if err != nil {

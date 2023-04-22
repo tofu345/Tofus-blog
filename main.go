@@ -12,6 +12,8 @@ import (
 
 // ! Have post likes be positioned with grid not padding
 // ? Change db error messages
+// ! use varaibles in css
+// ! implement something similar to messages in django
 
 func main() {
 	port := "8005"

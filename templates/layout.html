@@ -28,14 +28,6 @@
                     @apply drop-shadow-xl bg-white rounded-lg p-4 m-2 mb-5;
                 }
 
-                .logo {
-                    transform: scale(2) translateY(-10px);
-                }
-
-                .logo:hover {
-                    transform: scale(2.2) translateY(-10px);
-                }
-
                 .dropdown-item {
                     @apply p-2 rounded-lg box-content cursor-pointer;
                 }
@@ -43,34 +35,59 @@
                 .link {
                     @apply hover:underline underline-offset-4 cursor-pointer;
                 }
+
+                .user-dropdown-item {
+                    @apply px-2 py-2 rounded-md hover:bg-[#d9d9d9] w-full;
+                }
             }
         </style>
 
         <!-- JS -->
-        <script src="/static/js/main.js"></script>
+        <script defer src="/static/js/main.js"></script>
     </head>
-    <body>
-        {{if .template_config.BackgroundShown}}
-        <div
-            class="background-base skew z-0 text-white font-bold h-[54%] sm:h-[400px] w-full absolute top-[-3%] right-0"
-        ></div>
-        {{end}}
-
-        <div class="z-10 relative text-white">
+    <body class="relative">
+        <div class="z-10 relative text-[#545454]">
             {{if .template_config.NavbarShown}}
             <nav
-                class="w-full flex-between py-6 max-w-[85%] mx-auto font-semibold text-lg"
+                class="bg-[#eaeaea] w-full flex-between h-16 p-2 px-4 mx-auto font-semibold text-lg"
             >
                 <a href="/">
                     <img
-                        class="h-16 rounded-full ease-in duration-150 logo"
                         src="/static/images/logo.png"
                         alt="Tofus-Blog"
+                        width="200px"
+                        height="50px"
                     />
                 </a>
-                <div class="flex flex-row gap-5">
+
+                <div class="flex flex-row gap-4 items-center text-base">
                     <a href="#" class="link h-fit"> Create </a>
+                    {{ if userLoggedIn .user }}
+                    <!-- User Dropdown -->
+                    <label
+                        id="user-dropdown relative"
+                        for="user-dropdown-toggle"
+                        class="w-[30px] h-[30px] bg-[#bfbfbf] rounded-full p-1 cursor-pointer"
+                    >
+                    </label>
+                    <input
+                        type="checkbox"
+                        id="user-dropdown-toggle"
+                        style="display: none"
+                    />
+
+                    <!-- User Dropdown Content-->
+                    <div
+                        id="user-dropdown-content"
+                        class="z-10 p-1 hidden absolute top-[62px] right-[10px] bg-[#eaeaea] w-[150px] h-fit rounded-b-md flex flex-col drop-shadow-xl"
+                    >
+                        <p onclick="logout()" class="user-dropdown-item">
+                            Logout
+                        </p>
+                    </div>
+                    {{ else }}
                     <a href="/login" class="link h-fit"> Login </a>
+                    {{end}}
                 </div>
             </nav>
             {{end}} {{template "body" .}}

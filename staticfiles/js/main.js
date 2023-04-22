@@ -1,7 +1,34 @@
 const baseURL = "http://localhost:8005";
+const urlParams = new URLSearchParams(window.location.search);
 
 if (!navigator.cookieEnabled) {
     console.error("Error: Cookies not enabled");
+}
+
+function logout() {
+    deleteCookie("token");
+    window.location.href = baseURL + "/login";
+}
+
+// User Dropdown
+dropdownToggle = document.getElementById("user-dropdown-toggle");
+if (dropdownToggle) {
+    dropdownToggle.addEventListener("change", (e) => {
+        dropdownContent = document.getElementById("user-dropdown-content");
+
+        if (e.target.checked) {
+            dropdownContent.style.display = "block";
+        } else {
+            dropdownContent.style.display = "";
+        }
+    });
+
+    window.onclick = function (event) {
+        if (!event.target.matches("#user-dropdown")) {
+            dropdownContent = document.getElementById("user-dropdown-content");
+            dropdownContent.style.display = "";
+        }
+    };
 }
 
 function setCookie(name, value, daysToLive) {
@@ -30,10 +57,10 @@ function getCookie(name) {
     return result;
 }
 
-setCookie("firstName", "tofs", 7);
-setCookie("lastName", "ya", 7);
+// setCookie("firstName", "tofs", 7);
+// setCookie("lastName", "ya", 7);
 
 // console.log(document.cookie);
 
-console.log(getCookie("firstName"));
-console.log(getCookie("lastName"));
+// console.log(getCookie("firstName"));
+// console.log(getCookie("lastName"));

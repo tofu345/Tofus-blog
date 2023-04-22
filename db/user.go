@@ -12,13 +12,19 @@ type User struct {
 	Password        string    `json:"password"`
 	Email           string    `json:"email" gorm:"unique"`
 	AccessToken     string    `json:"-" gorm:"unique"` // Exclude from JSON serialization
-	TokenExpiryDate time.Time `json:"-"`
+	TokenExpiryDate time.Time `json:"token_expiry_date"`
 	BaseModel
 }
 
 func GetUser(user *User) error {
 	result := DB.First(&user, "email = ?", user.Email)
 	return result.Error
+}
+
+func GetUserByToken(token string) (User, error) {
+	var user User
+	result := DB.First(&user, "access_token = ?", token)
+	return user, result.Error
 }
 
 func GetUserByEmail(email string) (*User, error) {

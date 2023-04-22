@@ -24,3 +24,27 @@ div:hover > div.dropdown-toggle-wrapper {
 /* input[type="checkbox"]:checked + label.dropdown-wrapper {
     background: rgb(229 231 235);
 } */
+
+/* Logo animation */
+#logo-wrapper {
+    width: 110px;
+    height: 50px;
+    overflow: hidden;
+    transition: width 0.2s ease-in;
+}
+
+#logo-wrapper:hover {
+    width: 200px;
+    transition: width 0.2s ease-in;
+}
+
+#logo-wrapper img {
+    min-width: 200px;
+    height: 50px;
+}
+
+/* logo background */
+.logo-background {
+    background: url("/static/images/logo-background.png");
+    background-repeat: repeat;
+}

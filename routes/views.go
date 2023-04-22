@@ -25,21 +25,16 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 		j--
 	}
 
-	// Check for cookie
-	// cookie, err := r.Cookie("firstName")
-	// if err != nil {
-	// 	ErrorResponse(w, r, err, "not implemented")
-	// 	return
-	// }
-
-	// fmt.Println(cookie.Name, cookie.Value)
-
-	RenderTemplate(w, r, "posts/post_list.html", map[string]any{"posts": objects}, NewTemplateConfig())
+	RenderTemplate(w, r, "posts/post_list.html",
+		map[string]any{"posts": objects}, NewTemplateConfig())
 }
 
 func NotFound404Handler(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, r, "error.html",
-		map[string]any{"data": fmt.Sprintf("The page %v was not found", r.URL), "err": "404 Not Found"}, &TemplateConfig{})
+		map[string]any{
+			"data": fmt.Sprintf("The page %v was not found", r.URL),
+			"err":  "404 Not Found",
+		}, &TemplateConfig{})
 }
 
 func postDetailView(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +43,8 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 
 	post, err := db.GetPostBySlug(slug)
 	if err != nil {
-		ErrorResponse(w, r, errors.New("Post Not Found"), fmt.Sprintf("No post with slug %v was found", slug))
+		ErrorResponse(w, r, errors.New("Post Not Found"),
+			fmt.Sprintf("No post with slug %v was found", slug))
 		return
 	}
 
@@ -57,5 +53,16 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginView(w http.ResponseWriter, r *http.Request) {
+	_, err := getUserFromRequest(w, r)
+	if err == nil {
+		// User logged in - redirect to home
+		http.Redirect(w, r, baseUrl, http.StatusSeeOther)
+		return
+	}
+
 	RenderTemplate(w, r, "login.html", map[string]any{}, &TemplateConfig{})
+}
+
+func signUpView(w http.ResponseWriter, r *http.Request) {
+	JSONResponse(w, 103, nil, "Not implemented")
 }

@@ -1,34 +1,55 @@
 {{ define "title" }} Tofus Blog - Login {{ end }}
 <br />
 {{ define "body" }}
-<div class="flex h-screen">
+<div class="flex h-screen w-screen logo-background">
     <div
-        class="m-auto drop-shadow-xl background-base rounded-lg p-2 w-[50%] h-[60%]"
+        class="m-auto drop-shadow-xl rounded-xl border xl:w-[60%] w-[70%] h-[70%]"
     >
         <div class="text-black flex h-full">
-            <div class="w-full h-full xl:block hidden">
+            <div class="w-full lg:block hidden bg-[#eaeaea]">
                 <!-- Left -->
+                <a href="/" class="h-full flex justify-center items-center">
+                    <img
+                        src="/static/images/logo-2.png"
+                        alt="Tofus-Blog"
+                        class="max-h-[300px] w-auto rounded-lg"
+                    />
+                </a>
             </div>
-            <div class="w-full h-full rounded-lg bg-white">
+            <div class="w-full rounded-r-xl bg-white border relative">
                 <!-- Right -->
-                <div class="flex h-full">
+                <div class="absolute top-4 left-4 block lg:hidden">
+                    <a href="/">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            fill="currentColor"
+                            class="bi bi-arrow-left-short"
+                            viewBox="0 0 16 16"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"
+                            />
+                        </svg>
+                    </a>
+                </div>
+                <div class="flex flex-col h-full justify-center">
                     <form
                         method="POST"
-                        class="my-auto mx-[10%] w-full text-black"
+                        class="mx-7 text-black text-sm"
                         id="login-form"
                     >
-                        <div class="mx-auto w-fit h-full pb-10">
-                            <img
-                                class="h-32 rounded-full border"
-                                src="/static/images/logo.png"
-                                alt="Tofus-Blog"
-                            />
+                        <div class="pb-4">
+                            <h1 class="text-3xl">Log in</h1>
+                            <div
+                                id="login-error"
+                                class="pt-2 text-sm text-red-500"
+                            ></div>
                         </div>
                         <div>
-                            <label
-                                for="email"
-                                class="block mb-2 text-sm text-gray-900"
-                            >
+                            <label for="email" class="block mb-2 text-gray-900">
                                 Email Address
                             </label>
                             <input
@@ -36,14 +57,14 @@
                                 name="email"
                                 id="email"
                                 class="bg-gray-50 border text-gray-900 rounded-lg focus:border-[#3398e1] w-full p-2.5 mb-2"
-                                placeholder="name@email.com"
+                                placeholder="name@example.com"
                                 required="true"
                             />
                         </div>
                         <div>
                             <label
                                 for="password"
-                                class="block mb-2 text-sm text-gray-900"
+                                class="block mb-2 text-gray-900"
                             >
                                 Password
                             </label>
@@ -56,17 +77,14 @@
                                 required="true"
                             />
                         </div>
-                        <p
-                            id="login-error"
-                            class="inline-block text-sm text-red-500"
-                        ></p>
                         <button
                             type="submit"
-                            class="mt-1 w-full text-black border hover:bg-primary-700 hover:background-base hover:text-white focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            class="my-2 mt-4 w-full text-black border hover:bg-[#eaeaea] focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5 text-center disabled:bg-[#eaeaea] disabled:border-white disabled:text-gray-500"
+                            id="signin-btn"
                         >
                             Sign in
                         </button>
-                        <p class="mt-1 text-sm font-light text-gray-500">
+                        <p class="mt-1 font-light text-gray-500">
                             Don’t have an account yet?
                             <a
                                 href="/signup"
