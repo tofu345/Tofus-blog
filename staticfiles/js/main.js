@@ -16,7 +16,7 @@ if (dropdownToggle) {
     dropdownToggle.addEventListener("change", (e) => {
         dropdownContent = document.getElementById("user-dropdown-content");
 
-        if (e.target.checked) {
+        if (e.target.checked && dropdownContent.style.display != "block") {
             dropdownContent.style.display = "block";
         } else {
             dropdownContent.style.display = "";
@@ -27,6 +27,7 @@ if (dropdownToggle) {
         if (!event.target.matches("#user-dropdown")) {
             dropdownContent = document.getElementById("user-dropdown-content");
             dropdownContent.style.display = "";
+            dropdownToggle.checked = true;
         }
     };
 }

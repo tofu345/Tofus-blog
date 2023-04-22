@@ -32,7 +32,7 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 func NotFound404Handler(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, r, "error.html",
 		map[string]any{
-			"data": fmt.Sprintf("The page %v was not found", r.URL),
+			"data": fmt.Sprintf("The page %v%v was not found", r.Host, r.URL),
 			"err":  "404 Not Found",
 		}, &TemplateConfig{})
 }
