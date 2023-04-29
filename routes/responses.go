@@ -36,6 +36,9 @@ const (
 
 	NoTokenFound = "No Token"
 	TokenExpired = "Token Expired"
+
+	RecordNotFound = "record not found"
+	LoginError     = "Incorrent username or password"
 )
 
 func getIdFromRequest(req *http.Request) (int, error) {
@@ -62,7 +65,7 @@ func getUserFromRequest(w http.ResponseWriter, r *http.Request) (db.User, error)
 
 	user, err := db.GetUserByToken(token.Value)
 	if err != nil {
-		if err.Error() == db.RecordNotFound {
+		if err.Error() == RecordNotFound {
 			err = errors.New(NoTokenFound)
 		}
 

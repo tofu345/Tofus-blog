@@ -9,10 +9,6 @@ import (
 
 var DB *gorm.DB
 
-const (
-	RecordNotFound = "record not found"
-)
-
 var models = []any{
 	&Post{},
 	&Comment{},

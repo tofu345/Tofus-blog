@@ -45,18 +45,18 @@
         <!-- JS -->
         <script defer src="/static/js/main.js"></script>
     </head>
-    <body class="relative">
+    <body class="relative h-screen bg-[#eaeaea] m-0">
         <div class="z-10 relative text-[#545454]">
             {{if .template_config.NavbarShown}}
             <nav
-                class="bg-[#eaeaea] w-full flex-between h-16 p-2 px-4 mx-auto font-semibold text-lg"
+                class="bg-[#eaeaea] w-full flex-between h-17 p-2 px-4 mx-auto font-semibold text-lg"
             >
                 <a href="/">
                     <img
-                        src="/static/images/logo.png"
+                        src="/static/images/logo-short.png"
                         alt="Tofus-Blog"
-                        width="200px"
-                        height="50px"
+                        width="120px"
+                        height="full"
                     />
                 </a>
 
@@ -64,22 +64,15 @@
                     <a href="#" class="link h-fit"> Create </a>
                     {{ if userLoggedIn .user }}
                     <!-- User Dropdown -->
-                    <label
-                        id="user-dropdown relative"
-                        for="user-dropdown-toggle"
-                        class="w-[30px] h-[30px] bg-[#bfbfbf] rounded-full p-1 cursor-pointer"
-                    >
-                    </label>
-                    <input
-                        type="checkbox"
+                    <div
                         id="user-dropdown-toggle"
-                        style="display: none"
-                    />
+                        class="w-[30px] h-[30px] bg-[#bfbfbf] rounded-full p-1 cursor-pointer"
+                    ></div>
 
                     <!-- User Dropdown Content-->
                     <div
                         id="user-dropdown-content"
-                        class="z-10 p-1 hidden absolute top-[62px] right-[10px] bg-[#eaeaea] w-[200px] h-fit rounded-md flex flex-col drop-shadow-xl border border-gray-300"
+                        class="z-10 p-1 text-sm hidden absolute top-[62px] right-[10px] bg-[#eaeaea] w-[200px] h-fit rounded-md flex flex-col drop-shadow-xl border border-gray-300"
                     >
                         <a href="/settings">
                             <div class="user-dropdown-item cursor-pointer">
@@ -130,6 +123,12 @@
             </nav>
             {{end}} {{template "body" .}}
         </div>
+
+        <img
+            src="/static/images/background-2.png"
+            class="page-background"
+            alt=""
+        />
     </body>
 </html>
 {{end}}

@@ -193,9 +193,6 @@ func userListApi(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(w, 100, users, "User List")
 }
 
-// Check username and password
-// Generate token and token expiry date and store
-// return token
 func userLoginApi(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
@@ -220,12 +217,16 @@ func userLoginApi(w http.ResponseWriter, r *http.Request) {
 
 	user, err := db.GetUserByEmail(userData["email"])
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error")
+		if err.Error() == RecordNotFound {
+			JSONResponse(w, 103, LoginError, "Error")
+		} else {
+			JSONResponse(w, 103, err.Error(), "Error")
+		}
 		return
 	}
 
 	if !db.CheckPasswordHash(userData["password"], user.Password) {
-		JSONResponse(w, 103, "Incorrect Password", "Error")
+		JSONResponse(w, 103, LoginError, "Error")
 		return
 	}
 

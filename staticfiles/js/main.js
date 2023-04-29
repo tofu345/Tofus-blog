@@ -2,34 +2,30 @@ const baseURL = "http://localhost:8005";
 const urlParams = new URLSearchParams(window.location.search);
 
 if (!navigator.cookieEnabled) {
-    console.error("Error: Cookies not enabled");
+    console.error(
+        "Error: Cookies not enabled User authentication will not work"
+    );
 }
 
-function logout() {
-    deleteCookie("token");
-    window.location.href = baseURL + "/login";
-}
-
-// User Dropdown
-dropdownToggle = document.getElementById("user-dropdown-toggle");
-if (dropdownToggle) {
-    dropdownToggle.addEventListener("change", (e) => {
-        dropdownContent = document.getElementById("user-dropdown-content");
-
-        if (e.target.checked && dropdownContent.style.display != "block") {
-            dropdownContent.style.display = "block";
-        } else {
-            dropdownContent.style.display = "";
-        }
-    });
-
-    window.onclick = function (event) {
-        if (!event.target.matches("#user-dropdown")) {
-            dropdownContent = document.getElementById("user-dropdown-content");
-            dropdownContent.style.display = "";
-            dropdownToggle.checked = true;
-        }
-    };
+function registerDropdown(trigger, content) {
+    let dropdown = document.getElementById(content);
+    let dropdownToggle = document.getElementById(trigger);
+    if (dropdownToggle && dropdownToggle) {
+        dropdownToggle.addEventListener("click", () => {
+            if (dropdown.style.display == "block") {
+                dropdown.style.display = "";
+            } else {
+                dropdown.style.display = "block";
+            }
+        });
+        window.onclick = function (event) {
+            if (event.target != dropdownToggle) {
+                dropdown.style.display = "";
+            }
+        };
+    } else {
+        console.error(`Error: ${trigger} and ${content} not found`);
+    }
 }
 
 function setCookie(name, value, daysToLive) {
@@ -42,6 +38,11 @@ function setCookie(name, value, daysToLive) {
 
 function deleteCookie(name) {
     setCookie(name, null, null);
+}
+
+function logout() {
+    deleteCookie("token");
+    window.location.href = baseURL + "/login";
 }
 
 function getCookie(name) {
@@ -59,9 +60,10 @@ function getCookie(name) {
 }
 
 // setCookie("firstName", "tofs", 7);
-// setCookie("lastName", "ya", 7);
 
 // console.log(document.cookie);
 
 // console.log(getCookie("firstName"));
 // console.log(getCookie("lastName"));
+
+registerDropdown("user-dropdown-toggle", "user-dropdown-content");

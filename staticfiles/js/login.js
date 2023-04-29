@@ -22,24 +22,7 @@ function validateLoginForm(event) {
         })
         .then((res) => {
             if (res.responseCode != 100) {
-                console.error(`Error: ${res.data}`);
-
-                if (res.data == "record not found") {
-                    errorText.innerHTML =
-                        "No user was found with specified email and password";
-                } else {
-                    errorText.innerHTML = res.data;
-                }
-                return;
-            }
-
-            if (res.data == null) {
-                console.error(`Error: No data in response`);
-                return;
-            }
-
-            if (res.data.token == null) {
-                console.error(`Error: No token in response`);
+                errorText.innerHTML = res.data;
                 return;
             }
 

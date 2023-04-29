@@ -20,7 +20,7 @@ The salt is stored as part of the hashed password.
 So bcrypt.CompareHashAndPassword(encryptedPassword, plainPassword)
 can encrypt plainPassword using the same salt as encryptedPassword and compare them.
 
-src: https://stackoverflow.com/questions/52121168/bcrypt-encryption-different-every-time-with-same-input
+https://stackoverflow.com/questions/52121168/bcrypt-encryption-different-every-time-with-same-input
 */
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
