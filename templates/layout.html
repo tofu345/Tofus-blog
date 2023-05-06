@@ -61,8 +61,13 @@
                 </a>
 
                 <div class="flex flex-row gap-4 items-center text-base">
-                    <a href="#" class="link h-fit"> Create </a>
                     {{ if userLoggedIn .user }}
+                    <a href="#">
+                        <div class="user-dropdown-item cursor-pointer">
+                            <p>Create</p>
+                        </div>
+                    </a>
+
                     <!-- User Dropdown -->
                     <div
                         id="user-dropdown-toggle"

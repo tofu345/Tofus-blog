@@ -4,23 +4,18 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"tofs-blog/routes"
+	"tofs-blog/src"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
-
-// ! Have post likes be positioned with grid not padding
-// ? Change db error messages
-// ! use varaibles in css
-// ! implement something similar to messages in django
 
 func main() {
 	port := "8005"
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
 
-	routes.Register(r)
+	src.RegisterRoutes(r)
 
 	log.Print("Listening on port http://localhost:", port)
 	log.Fatal(http.ListenAndServe("localhost:"+port, r))

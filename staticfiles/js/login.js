@@ -12,6 +12,17 @@ function validateLoginForm(event) {
     var object = {};
     formData.forEach((value, key) => (object[key] = value));
 
+    if (!object["email"]) {
+        errorText.innerHTML = "Email Address is required";
+        signinBtn.disabled = false;
+        return;
+    }
+    if (!object["password"]) {
+        errorText.innerHTML = "Password is required";
+        signinBtn.disabled = false;
+        return;
+    }
+
     fetch("/api/login", {
         method: "POST",
         body: JSON.stringify(object),
