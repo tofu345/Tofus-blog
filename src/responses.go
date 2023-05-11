@@ -28,10 +28,6 @@ type TemplateConfig struct {
 const (
 	baseUrl = "http://localhost:8005"
 
-	InvalidURL      = "Invalid URL"
-	InvalidPOSTData = "Invalid POST Data"
-	InvalidData     = "Invalid Data"
-
 	NoTokenFound = "Invalid Token"
 	TokenExpired = "Token Expired"
 
@@ -43,15 +39,6 @@ func getIdFromRequest(req *http.Request) (int, error) {
 	vars := mux.Vars(req)
 	return strconv.Atoi(vars["id"])
 }
-
-// todo: unnecessary right now
-// func formatDbError(errPtr *error) {
-// 	err := *errPtr
-// 	switch err.Error() {
-// 	case "record not found":
-
-// 	}
-// }
 
 func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error) {
 	token := r.Header.Get("Authorization")
@@ -124,6 +111,7 @@ func JSONError(w http.ResponseWriter, err string) {
 	if err == RecordNotFound {
 		err = "Object Not Found"
 	} else if strings.HasPrefix(err, "UNIQUE constraint failed: ") {
+		// UNIQUE constraint failed: posts.title -> Title is already in use
 		attr := strings.Split(strings.Split(err, ": ")[1], ".")[1]
 		err = strings.Title(attr + " is already in use")
 	}
