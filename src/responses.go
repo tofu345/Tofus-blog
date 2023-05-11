@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -80,11 +79,6 @@ func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
 	user, err := getUserByToken(token.Value)
 	if err != nil {
 		return User{}, err
-	}
-
-	currentTime := time.Now()
-	if user.TokenExpiryDate.Before(currentTime) {
-		return User{}, errors.New(TokenExpired)
 	}
 
 	return user, nil

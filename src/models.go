@@ -71,6 +71,11 @@ func getUserByToken(token string) (User, error) {
 		return User{}, err
 	}
 
+	currentTime := time.Now()
+	if user.TokenExpiryDate.Before(currentTime) {
+		return User{}, errors.New(TokenExpired)
+	}
+
 	return user, err
 }
 
