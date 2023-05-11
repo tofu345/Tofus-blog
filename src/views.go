@@ -9,9 +9,9 @@ import (
 )
 
 // ! Have post likes be positioned with grid not padding
-// ? Change db error messages
 // ? Expand post on post list page instead of redirect
-// ! use varaibles in css
+// ? use varaibles in css
+// ! Permissions to have admins delete stuff
 // ! implement something similar to messages in django
 
 func homeView(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +30,7 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RenderTemplate(w, r, "posts/post_list.html",
-		map[string]any{"posts": objects}, NewTemplateConfig())
+		map[string]any{"posts": objects}, &TemplateConfig{NavbarShown: true})
 }
 
 func NotFound404Handler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +53,7 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RenderTemplate(w, r, "posts/post_detail.html",
-		map[string]any{"post": post}, NewTemplateConfig())
+		map[string]any{"post": post}, &TemplateConfig{NavbarShown: true})
 }
 
 func loginView(w http.ResponseWriter, r *http.Request) {

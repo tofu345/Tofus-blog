@@ -1,6 +1,7 @@
 package src
 
 import (
+	"errors"
 	"time"
 )
 
@@ -11,8 +12,8 @@ type BaseModel struct {
 
 type Post struct {
 	ID       int       `gorm:"primarykey" json:"id"`
-	Title    string    `json:"title" gorm:"unique"`
-	Slug     string    `json:"slug"  gorm:"unique"`
+	Title    string    `json:"title"`
+	Slug     string    `json:"slug"`
 	Body     string    `json:"body"`
 	Author   string    `json:"author"`
 	Views    int       `json:"views"`
@@ -38,10 +39,6 @@ func (post *Post) Errors() map[string]string {
 		errors["body"] = "This field is required"
 	}
 
-	if post.Author == "" {
-		errors["author"] = "This field is required"
-	}
-
 	return errors
 }
 
@@ -62,6 +59,19 @@ type User struct {
 	AccessToken     string    `json:"-" gorm:"unique"` // Exclude from JSON serialization
 	TokenExpiryDate time.Time `json:"token_expiry_date"`
 	BaseModel
+}
+
+func getUserByToken(token string) (User, error) {
+	var user User
+	err := db.First(&user, "access_token = ?", token).Error
+	if err != nil {
+		if err.Error() == RecordNotFound {
+			return User{}, errors.New(NoTokenFound)
+		}
+		return User{}, err
+	}
+
+	return user, err
 }
 
 func (user *User) Errors() map[string]string {

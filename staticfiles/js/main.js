@@ -60,9 +60,7 @@ function getCookie(name) {
 }
 
 // setCookie("firstName", "tofs", 7);
-
 // console.log(document.cookie);
-
 // console.log(getCookie("firstName"));
 // console.log(getCookie("lastName"));
 

@@ -33,11 +33,11 @@ const (
 	InvalidPOSTData = "Invalid POST Data"
 	InvalidData     = "Invalid Data"
 
-	NoTokenFound = "No Token"
+	NoTokenFound = "Invalid Token"
 	TokenExpired = "Token Expired"
 
 	RecordNotFound = "record not found"
-	LoginError     = "Incorrent username or password"
+	LoginError     = "Incorrect username or password"
 )
 
 func getIdFromRequest(req *http.Request) (int, error) {
@@ -54,6 +54,21 @@ func getIdFromRequest(req *http.Request) (int, error) {
 // 	}
 // }
 
+func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		return User{}, errors.New(NoTokenFound)
+	}
+
+	token = strings.Split(token, " ")[1]
+	user, err := getUserByToken(token)
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
 // Uses user token to get logged in user
 // returns empty user object if not logged in
 func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
@@ -62,13 +77,8 @@ func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
 		return User{}, errors.New(NoTokenFound)
 	}
 
-	var user User
-	err = db.First(&user, "access_token = ?", token.Value).Error
+	user, err := getUserByToken(token.Value)
 	if err != nil {
-		if err.Error() == RecordNotFound {
-			err = errors.New(NoTokenFound)
-		}
-
 		return User{}, err
 	}
 
@@ -94,15 +104,9 @@ func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User
 		ErrorResponse(w, r, err, "Error")
 	}
 
-	fmt.Println(err.Error())
+	// fmt.Println(err.Error())
 
 	return user, err
-}
-
-func NewTemplateConfig() *TemplateConfig {
-	return &TemplateConfig{
-		NavbarShown: true,
-	}
 }
 
 // responseCode: 103 - Bad, 100 - Good
@@ -120,6 +124,17 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 		Data:         data,
 		Message:      message,
 	})
+}
+
+func JSONError(w http.ResponseWriter, err string) {
+	if err == RecordNotFound {
+		err = "Object Not Found"
+	} else if strings.HasPrefix(err, "UNIQUE constraint failed: ") {
+		attr := strings.Split(strings.Split(err, ": ")[1], ".")[1]
+		err = strings.Title(attr + " is already in use")
+	}
+
+	JSONResponse(w, 103, err, "Error")
 }
 
 // Renders error page

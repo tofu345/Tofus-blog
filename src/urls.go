@@ -32,7 +32,7 @@ func RegisterRoutes(r *mux.Router) {
 
 		{url: "/login", methods: []string{"GET"}, function: loginView},
 		{url: "/signup", methods: []string{"GET"}, function: signUpView},
-		{url: "/posts/{slug}", methods: []string{"GET"}, function: postDetailView},
+		{url: "/posts/{id}/{slug}", methods: []string{"GET"}, function: postDetailView},
 	}
 
 	// Static Files

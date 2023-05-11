@@ -2,6 +2,7 @@ package src
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gosimple/slug"
@@ -11,9 +12,9 @@ func getPostList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
 	postList := []Post{}
-	err := db.First(&postList).Error
-	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error fetching records")
+	err := db.Find(&postList).Error
+	if err != nil && err.Error() != RecordNotFound {
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -25,14 +26,14 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
+		JSONError(w, err.Error())
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Post Not Found")
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -42,22 +43,36 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 func createPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
-	var post Post
-	err := JSONDecode(r, &post)
+	user, err := getUserFromRequestApi(w, r)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
+		JSONError(w, err.Error())
+		return
 	}
 
-	post.Slug = slug.Make(post.Title)
+	var post Post
+	err = JSONDecode(r, &post)
+	if err != nil {
+		JSONError(w, err.Error())
+		return
+	}
+
+	post.Author = user.Username
+	maxChars := 60
+	post.Slug = post.Title
+	if maxChars < len(post.Slug) {
+		post.Slug = post.Slug[:strings.LastIndex(post.Slug[:maxChars], " ")]
+	}
+
+	post.Slug = slug.Make(post.Slug)
 	err_map := post.Errors()
 	if len(err_map) != 0 {
-		JSONResponse(w, 103, err_map, InvalidData)
+		JSONResponse(w, 103, err_map, "Error")
 		return
 	}
 
 	err = db.Create(&post).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error Creating Post")
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -68,33 +83,69 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
+		JSONError(w, err.Error())
 		return
 	}
 
-	db.Delete(&Post{ID: id})
-	JSONResponse(w, 100, nil, "Success")
-}
-
-func updatePost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-	id, err := getIdFromRequest(r)
+	user, err := getUserFromRequestApi(w, r)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
+		JSONError(w, err.Error())
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Post Not Found")
+		JSONError(w, err.Error())
+		return
+	}
+
+	// ? perms
+	if post.Author != user.Username {
+		JSONError(w, "You do not have permission to delete this")
+		return
+	}
+
+	err = db.Delete(&post).Error
+	if err != nil {
+		JSONError(w, err.Error())
+		return
+	}
+	JSONResponse(w, 100, nil, "Success")
+}
+
+func updatePost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
+	user, err := getUserFromRequestApi(w, r)
+	if err != nil {
+		JSONError(w, err.Error())
+		return
+	}
+
+	id, err := getIdFromRequest(r)
+	if err != nil {
+		JSONError(w, err.Error())
+		return
+	}
+
+	post := Post{ID: id}
+	err = db.First(&post).Error
+	if err != nil {
+		JSONError(w, err.Error())
+		return
+	}
+
+	// ? perms
+	if post.Author != user.Username {
+		JSONError(w, "You do not have permission to edit this")
 		return
 	}
 
 	oldTitle := post.Title
 	err = JSONDecode(r, &post)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidPOSTData)
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -105,13 +156,13 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 
 	errs := post.Errors()
 	if len(errs) != 0 {
-		JSONResponse(w, 103, errs, InvalidData)
+		JSONResponse(w, 103, errs, "Error")
 		return
 	}
 
 	err = db.Save(&post).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error Updating Post")
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -122,28 +173,28 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidURL)
+		JSONError(w, err.Error())
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Post Not Found")
+		JSONError(w, err.Error())
 		return
 	}
 
 	var comment Comment
 	err = JSONDecode(r, &comment)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidPOSTData)
+		JSONError(w, err.Error())
 		return
 	}
 
 	post.Comments = append(post.Comments, comment)
 	err = db.Save(&post).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error Updating Post")
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -154,27 +205,27 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := JSONDecode(r, &user)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidPOSTData)
+		JSONError(w, err.Error())
 		return
 	}
 
 	err_map := user.Errors()
 	if len(err_map) != 0 {
-		JSONResponse(w, 103, err_map, InvalidData)
+		JSONResponse(w, 103, err_map, "Error")
 		return
 	}
 
 	var pswd string
 	pswd, err = HashPassword(user.Password)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error Creating Password Hash")
+		JSONError(w, err.Error())
 		return
 	}
 	user.Password = pswd
 
 	err = db.Create(&user).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error Creating User")
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -183,9 +234,9 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 
 func userList(w http.ResponseWriter, r *http.Request) {
 	users := []User{}
-	err := db.First(&users).Error
+	err := db.Find(&users).Error
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), "Error fetching records")
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -198,7 +249,7 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 	userData := make(map[string]string)
 	err := JSONDecode(r, &userData)
 	if err != nil {
-		JSONResponse(w, 103, err.Error(), InvalidPOSTData)
+		JSONError(w, err.Error())
 		return
 	}
 
@@ -210,23 +261,23 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		errors["password"] = "This field is required"
 	}
 	if len(errors) != 0 {
-		JSONResponse(w, 103, errors, InvalidData)
+		JSONResponse(w, 103, errors, "Error")
 		return
 	}
 
 	var user User
 	err = db.First(&user, "email = ?", userData["email"]).Error
 	if err != nil {
-		if err.Error() == RecordNotFound {
-			JSONResponse(w, 103, LoginError, "Error")
-		} else {
-			JSONResponse(w, 103, err.Error(), "Error")
+		err_str := err.Error()
+		if err_str == RecordNotFound {
+			err_str = LoginError
 		}
+		JSONError(w, err.Error())
 		return
 	}
 
 	if !CheckPasswordHash(userData["password"], user.Password) {
-		JSONResponse(w, 103, LoginError, "Error")
+		JSONError(w, LoginError)
 		return
 	}
 
@@ -235,7 +286,7 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 
 	err = db.Save(&user).Error
 	if err != nil {
-		JSONResponse(w, 103, "Error generating token", "Error")
+		JSONError(w, "Error generating token")
 		return
 	}
 
