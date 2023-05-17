@@ -28,7 +28,7 @@ type TemplateConfig struct {
 const (
 	baseUrl = "http://localhost:8005"
 
-	NoTokenFound = "Invalid Token"
+	TokenInvalid = "Invalid Token"
 	TokenExpired = "Token Expired"
 
 	RecordNotFound = "record not found"
@@ -43,7 +43,7 @@ func getIdFromRequest(req *http.Request) (int, error) {
 func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
-		return User{}, errors.New(NoTokenFound)
+		return User{}, errors.New(TokenInvalid)
 	}
 
 	token = strings.Split(token, " ")[1]
@@ -55,12 +55,10 @@ func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error)
 	return user, nil
 }
 
-// Uses user token to get logged in user
-// returns empty user object if not logged in
 func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
 	token, err := r.Cookie("token")
 	if err != nil {
-		return User{}, errors.New(NoTokenFound)
+		return User{}, errors.New(TokenInvalid)
 	}
 
 	user, err := getUserByToken(token.Value)
@@ -71,18 +69,17 @@ func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
 	return user, nil
 }
 
-// redirects to login page if not logged in and renders error page if user not found or any other error
 func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User, error) {
 	user, err := getUserFromRequest(w, r)
 	if err == nil {
 		return user, err
 	}
 
-	if err.Error() == NoTokenFound || err.Error() == TokenExpired {
+	if err.Error() == TokenInvalid || err.Error() == TokenExpired {
 		url := fmt.Sprintf("%v/login?next=%v", baseUrl, r.URL)
 		http.Redirect(w, r, url, http.StatusSeeOther)
 	} else {
-		ErrorResponse(w, r, err, "Error")
+		RenderErrorPage(w, r, err, "Error")
 	}
 
 	// fmt.Println(err.Error())
@@ -96,7 +93,7 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 
 	if responseCode == 103 {
 		w.WriteHeader(http.StatusBadRequest)
-	} else {
+	} else if responseCode == 100 {
 		w.WriteHeader(http.StatusOK)
 	}
 
@@ -119,8 +116,7 @@ func JSONError(w http.ResponseWriter, err string) {
 	JSONResponse(w, 103, err, "Error")
 }
 
-// Renders error page
-func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, data any) {
+func RenderErrorPage(w http.ResponseWriter, r *http.Request, err error, data any) {
 	log.Println("Error: " + err.Error())
 
 	RenderTemplate(w, r, "error.html",
@@ -129,7 +125,7 @@ func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, data any) 
 
 // Decodes request body into data
 //
-// data should be a pointer
+// data must be a pointer
 func JSONDecode(r *http.Request, data any) error {
 	return json.NewDecoder(r.Body).Decode(data)
 }

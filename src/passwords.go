@@ -18,7 +18,7 @@ Too many to store.
 
 The salt is stored as part of the hashed password.
 So bcrypt.CompareHashAndPassword(encryptedPassword, plainPassword)
-can encrypt plainPassword using the same salt as encryptedPassword and compare them.
+can encrypt plainPassword using the same salt as encryptedPassword and compare them
 
 https://stackoverflow.com/questions/52121168/bcrypt-encryption-different-every-time-with-same-input
 */

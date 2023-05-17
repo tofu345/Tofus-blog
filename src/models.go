@@ -66,7 +66,7 @@ func getUserByToken(token string) (User, error) {
 	err := db.First(&user, "access_token = ?", token).Error
 	if err != nil {
 		if err.Error() == RecordNotFound {
-			return User{}, errors.New(NoTokenFound)
+			return User{}, errors.New(TokenInvalid)
 		}
 		return User{}, err
 	}

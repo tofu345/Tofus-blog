@@ -11,14 +11,20 @@ import (
 // ! Have post likes be positioned with grid not padding
 // ? Expand post on post list page instead of redirect
 // ? use varaibles in css
+
 // ! Permissions to have admins delete stuff
+// ! Permissions to view user list api because of passswords
+
 // ! implement something similar to messages in django
+// ! Prevent some fields from being changed via update api e.g. likes and views
+// ? Upload files
+// ? Js rich-text editor e.g. TinyMCE
 
 func homeView(w http.ResponseWriter, r *http.Request) {
 	objects := []Post{}
 	err := db.Find(&objects).Error
 	if err != nil {
-		ErrorResponse(w, r, err, nil)
+		RenderErrorPage(w, r, err, nil)
 		return
 	}
 
@@ -47,7 +53,7 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 
 	post, err := GetPostBySlug(slug)
 	if err != nil {
-		ErrorResponse(w, r, errors.New("Post Not Found"),
+		RenderErrorPage(w, r, errors.New("Post Not Found"),
 			fmt.Sprintf("No post with slug %v was found", slug))
 		return
 	}

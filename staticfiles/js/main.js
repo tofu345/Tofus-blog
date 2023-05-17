@@ -2,31 +2,36 @@ const baseURL = "http://localhost:8005";
 const urlParams = new URLSearchParams(window.location.search);
 
 if (!navigator.cookieEnabled) {
-    console.error(
-        "Error: Cookies not enabled User authentication will not work"
-    );
+    console.error("Cookies disabled user authentication might break.");
 }
 
-function registerDropdown(trigger, content) {
-    let dropdown = document.getElementById(content);
-    let dropdownToggle = document.getElementById(trigger);
-    if (dropdownToggle && dropdownToggle) {
-        dropdownToggle.addEventListener("click", () => {
+let dropdowns = {};
+
+function dropdownSetup(toggle) {
+    let dropdownToggle = document.getElementById(toggle);
+    if (dropdownToggle) {
+        dropdownToggle.addEventListener("click", function () {
+            let dropdown = document.getElementById(this.dataset.content);
             if (dropdown.style.display == "block") {
                 dropdown.style.display = "";
             } else {
                 dropdown.style.display = "block";
             }
         });
-        window.onclick = function (event) {
-            if (event.target != dropdownToggle) {
-                dropdown.style.display = "";
-            }
-        };
+
+        dropdowns[toggle] = dropdownToggle.dataset.content;
     } else {
-        console.error(`Error: ${trigger} and ${content} not found`);
+        console.error(`Object ${toggle} not found.`);
     }
 }
+
+window.onclick = function (event) {
+    for (const key in dropdowns) {
+        if (event.target != document.getElementById(key)) {
+            document.getElementById(dropdowns[key]).style.display = "";
+        }
+    }
+};
 
 function setCookie(name, value, daysToLive) {
     const date = new Date();
@@ -64,4 +69,4 @@ function getCookie(name) {
 // console.log(getCookie("firstName"));
 // console.log(getCookie("lastName"));
 
-registerDropdown("user-dropdown-toggle", "user-dropdown-content");
+dropdownSetup("user-dropdown-toggle");
