@@ -107,8 +107,11 @@
                             </svg>
                         </button>
                         <!-- Votes -->
-                        <p class="text-sm font-medium" id="post-likes-{{.ID}}">
-                            {{ fmt_likes .post.Likes}}
+                        <p
+                            class="post-like text-sm font-medium"
+                            id="post-likes-{{.ID}}"
+                        >
+                            {{ .post.Likes }}
                         </p>
                         <!-- Down Arrow -->
                         <button class="p-[1px] py-1 rounded hover:bg-gray-200">

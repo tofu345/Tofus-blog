@@ -49,15 +49,22 @@ type Comment struct {
 	Message string `json:"message"`
 }
 
+type Permission struct {
+	ID          int    `gorm:"primarykey"`
+	Name        string `json:"name" gorm:"unique"`
+	Description string `json:"description"`
+}
+
 type User struct {
-	ID              int       `gorm:"primarykey" json:"id"`
-	FirstName       string    `json:"first_name"`
-	LastName        string    `json:"last_name"`
-	Username        string    `json:"username" gorm:"unique"`
-	Password        string    `json:"password"`
-	Email           string    `json:"email" gorm:"unique"`
-	AccessToken     string    `json:"-" gorm:"unique"` // Exclude from JSON serialization
-	TokenExpiryDate time.Time `json:"token_expiry_date"`
+	ID              int          `gorm:"primarykey" json:"id"`
+	FirstName       string       `json:"first_name"`
+	LastName        string       `json:"last_name"`
+	Username        string       `json:"username" gorm:"unique"`
+	Password        string       `json:"password"`
+	Email           string       `json:"email" gorm:"unique"`
+	AccessToken     string       `json:"-" gorm:"unique"` // Exclude from JSON serialization
+	TokenExpiryDate time.Time    `json:"token_expiry_date"`
+	UserPerms       []Permission `json:"permissions" gorm:"foreignKey:ID"`
 	BaseModel
 }
 

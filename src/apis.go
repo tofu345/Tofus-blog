@@ -100,8 +100,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ? perms
-	if post.Author != user.Username {
+	if !userHasPerm(user, "delete_post") && post.Author != user.Username {
 		JSONError(w, "You do not have permission to delete this")
 		return
 	}
@@ -111,6 +110,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		JSONError(w, err.Error())
 		return
 	}
+
 	JSONResponse(w, 100, nil, "Success")
 }
 
@@ -136,8 +136,7 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ? perms
-	if post.Author != user.Username {
+	if !userHasPerm(user, "delete_post") && post.Author != user.Username {
 		JSONError(w, "You do not have permission to edit this")
 		return
 	}

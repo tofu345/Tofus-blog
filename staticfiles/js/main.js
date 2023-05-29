@@ -69,4 +69,24 @@ function getCookie(name) {
 // console.log(getCookie("firstName"));
 // console.log(getCookie("lastName"));
 
+/*
+    Ajax
+    fetch(`/posts/${id}/likes`, {
+        method: "POST",
+        body: JSON.stringify({ vote: "like" }),
+    })
+        .then((res) => res.json())
+        .then((res) => {
+            if (res.responseCode != 100) {
+                console.error(`Error: ${res.data}`);
+                return;
+            }
+
+            updateLikes("+", elementId);
+        })
+        .catch((error) => {
+            console.error("Error: " + error);
+        });
+ */
+
 dropdownSetup("user-dropdown-toggle");

@@ -165,34 +165,14 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 
 	// Template Functions
 	funcs := template.FuncMap{
-		"truncateStr": func(text string) string {
-			max := 500
-			if max > len(text) {
-				return text
-			}
-			return text[:strings.LastIndex(text[:max], " ")] + "..."
-		},
 		"ls_or_eq": func(num1, num2 int) bool {
 			return num1 <= num2
 		},
 		"gt": func(num1, num2 int) bool {
 			return num1 > num2
 		},
-		"fmt_likes": func(likes uint64) string {
-			// < 1k
-			if likes <= 999 {
-				return fmt.Sprint(likes)
-			}
-
-			// < 1m
-			if likes <= 999999 {
-				return fmt.Sprintf("%dK", likes/1000)
-			}
-
-			return fmt.Sprintf("%dM", likes/1000000)
-		},
 		"userLoggedIn": func(user User) bool {
-			return user != User{}
+			return user.Email != ""
 		},
 	}
 

@@ -110,8 +110,11 @@
                             </svg>
                         </button>
                         <!-- Votes -->
-                        <p class="text-sm font-medium" id="post-likes-{{.ID}}">
-                            {{ fmt_likes .Likes}}
+                        <p
+                            class="post-like text-sm font-medium"
+                            id="post-likes-{{.ID}}"
+                        >
+                            {{.Likes}}
                         </p>
                         <!-- Down Arrow -->
                         <button class="p-[1px] py-1 rounded hover:bg-gray-200">
@@ -136,7 +139,7 @@
                             <p class="text-2xl font-medium">{{.Title}}</p>
 
                             <!-- whitespace-pre-line -->
-                            <p class="break-all">{{ truncateStr .Body }}</p>
+                            <p class="break-all post-body">{{ .Body }}</p>
 
                             <div
                                 class="pt-1 font-light text-gray-800 text-sm w-full rounded-b-lg flex"

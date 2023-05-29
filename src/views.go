@@ -8,18 +8,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ! Have post likes be positioned with grid not padding
-// ? Expand post on post list page instead of redirect
-// ? use varaibles in css
-
-// ! Permissions to have admins delete stuff
-// ! Permissions to view user list api because of passswords
-
-// ! implement something similar to messages in django
-// ! Prevent some fields from being changed via update api e.g. likes and views
-// ? Upload files
-// ? Js rich-text editor e.g. TinyMCE
-
 func homeView(w http.ResponseWriter, r *http.Request) {
 	objects := []Post{}
 	err := db.Find(&objects).Error

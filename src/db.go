@@ -13,6 +13,7 @@ var models = []any{
 	&Post{},
 	&Comment{},
 	&User{},
+	&Permission{},
 }
 
 func init() {

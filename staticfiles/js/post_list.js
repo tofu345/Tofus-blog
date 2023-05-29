@@ -14,22 +14,31 @@ for (let i = 0; i < dropdown_checkboxes.length; i++) {
     });
 }
 
-/*
-    Ajax
-    fetch(`/posts/${id}/likes`, {
-        method: "POST",
-        body: JSON.stringify({ vote: "like" }),
-    })
-        .then((res) => res.json())
-        .then((res) => {
-            if (res.responseCode != 100) {
-                console.error(`Error: ${res.data}`);
-                return;
-            }
+function formatLikes(likes) {
+    // < 1k
+    if (likes <= 999) {
+        return likes;
+    }
 
-            updateLikes("+", elementId);
-        })
-        .catch((error) => {
-            console.error("Error: " + error);
-        });
- */
+    // < 1m
+    if (likes <= 999999) {
+        return `${Math.floor(likes / 1000)}K`;
+    }
+
+    return `${Math.floor(likes / 1000000)}M`;
+}
+
+let postLikes = document.getElementsByClassName("post-like");
+for (let item of postLikes) {
+    item.innerHTML = formatLikes(item.innerHTML);
+}
+
+let postBodyList = document.getElementsByClassName("post-body");
+for (let item of postBodyList) {
+    let len = item.innerHTML.length;
+    let maxLen = 500;
+    item.innerHTML = item.innerHTML.substring(0, maxLen);
+    if (len > maxLen) {
+        item.innerHTML += "...";
+    }
+}
