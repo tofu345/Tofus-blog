@@ -3,8 +3,8 @@
 } */
 
 /* Keep dropdown shown */
-input[type="checkbox"]:checked + label.dropdown-toggle > svg.open,
-input[type="checkbox"]:not(:checked) + label.dropdown-toggle > svg.close {
+input[type="checkbox"]:checked + label.dropdown-toggle > img.open,
+input[type="checkbox"]:not(:checked) + label.dropdown-toggle > img.close {
     display: none;
 }
 input[type="checkbox"]:not(:checked)
@@ -34,4 +34,20 @@ div:hover > div.dropdown-toggle-wrapper {
     position: fixed;
     bottom: 0;
     right: 0;
+}
+
+/* https://jsfiddle.net/s85o9ag6/ */
+.skeleton {
+    background: linear-gradient(90deg, #ccca 40%, #fffa, #ccca 60%) right/300%
+        100%;
+}
+
+.skeleton-anim {
+    animation: skeleton-anim 1s linear infinite;
+}
+
+@keyframes skeleton-anim {
+    to {
+        background-position: left;
+    }
 }

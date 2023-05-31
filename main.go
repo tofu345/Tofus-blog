@@ -10,11 +10,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// ! Pagination
+// ? sort post list by updated_at
 // ! Script to give admin user permissions
 // ! Activity Stream
 // ! Admin Page
 // ! Have post likes be positioned with grid not padding
-// ! Create Post UI
 // ? Expand post on post list page instead of redirect
 // ? use varaibles in css
 // ! Permissions to view user list api because of passwords

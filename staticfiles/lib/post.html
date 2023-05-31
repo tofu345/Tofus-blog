@@ -1,0 +1,59 @@
+<div
+    class="card relative py-3 pl-10 box-content border border-transparent hover:border-gray-300"
+>
+    <!-- Top-left menu -->
+    <div class="dropdown-toggle-wrapper">
+        <input
+            type="checkbox"
+            id="dropdown-${id}"
+            style="display: none"
+            class="dropdown-checkbox"
+        />
+        <label
+            for="dropdown-${id}"
+            class="dropdown-toggle absolute top-2 right-2 hover:bg-gray-200 p-2 rounded-lg box-content cursor-pointer"
+        >
+            <img src="/static/svg/open.svg" class="open" data-id="${id}" />
+            <img src="/static/svg/close.svg" class="close" />
+        </label>
+        <div
+            class="dropdown-options absolute top-2 right-12 flex flex-row-reverse gap-2"
+        >
+            <div class="hover:bg-gray-200 dropdown-item">
+                <img src="/static/svg/edit.svg" />
+            </div>
+            <div class="hover:bg-gray-200 dropdown-item">
+                <img src="/static/svg/delete.svg" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Likes -->
+    <div
+        class="absolute top-0 left-0 z-10 w-6 h-full bg-white rounded-l-lg flex flex-col pl-3 pt-5 items-center"
+    >
+        <button class="w-[15px] p-[1px] py-1 rounded hover:bg-gray-200">
+            <img src="/static/svg/up-arrow.svg" />
+        </button>
+        <p class="text-sm font-medium" id="post-likes-${id}">${likes}</p>
+        <button class="w-[15px] p-[1px] py-1 rounded hover:bg-gray-200">
+            <img src="/static/svg/down-arrow.svg" />
+        </button>
+    </div>
+
+    <!-- Body -->
+    <a href="/posts/${id}/${slug}">
+        <div class="cursor-pointer">
+            <p class="text-2xl font-medium">${title}</p>
+
+            <!-- whitespace-pre-line -->
+            <p class="break-all post-body">${body}</p>
+
+            <div
+                class="pt-1 font-light text-gray-800 text-sm w-full rounded-b-lg flex"
+            >
+                ${created_at} - ${author}
+            </div>
+        </div>
+    </a>
+</div>

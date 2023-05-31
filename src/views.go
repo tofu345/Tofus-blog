@@ -1,6 +1,7 @@
 package src
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,22 +10,21 @@ import (
 )
 
 func homeView(w http.ResponseWriter, r *http.Request) {
-	objects := []Post{}
-	err := db.Find(&objects).Error
+	posts := []Post{}
+	err := db.Find(&posts).Error
 	if err != nil {
 		RenderErrorPage(w, r, err, nil)
 		return
 	}
 
-	// ? Reverse list on front end instead
-	j := len(objects) - 1
-	for i := 0; i < j; i++ {
-		objects[i], objects[j] = objects[j], objects[i]
-		j--
+	json, err := json.Marshal(posts)
+	if err != nil {
+		RenderErrorPage(w, r, err, nil)
+		return
 	}
 
 	RenderTemplate(w, r, "posts/post_list.html",
-		map[string]any{"posts": objects}, &TemplateConfig{NavbarShown: true})
+		map[string]any{"posts": string(json), "postLen": len(posts)}, &TemplateConfig{NavbarShown: true})
 }
 
 func NotFound404Handler(w http.ResponseWriter, r *http.Request) {

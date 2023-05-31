@@ -33,12 +33,53 @@ for (let item of postLikes) {
     item.innerHTML = formatLikes(item.innerHTML);
 }
 
-let postBodyList = document.getElementsByClassName("post-body");
-for (let item of postBodyList) {
-    let len = item.innerHTML.length;
-    let maxLen = 500;
-    item.innerHTML = item.innerHTML.substring(0, maxLen);
-    if (len > maxLen) {
-        item.innerHTML += "...";
+function truncateStr(string, maxLen) {
+    if (!maxLen) {
+        maxLen = 500;
     }
+    let len = string.length;
+    string = string.substring(0, maxLen);
+    if (len > maxLen) {
+        string += "...";
+    }
+    return string;
 }
+
+let postBody = document.getElementsByClassName("post-body");
+for (let item of postBody) {
+    item.innerHTML = truncateStr(item.innerHTML, 500);
+}
+
+const dateOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+};
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    let postsWrapper = document.getElementById("posts");
+    if (postList && postList.length != 0) {
+        httpGetAsync("/static/lib/post.html", (res) => {
+            postsWrapper.innerHTML = "";
+
+            for (let key in postList) {
+                let post = postList[key];
+                postsWrapper.innerHTML += parseTemplate(res, {
+                    id: post.id,
+                    likes: formatLikes(post.likes),
+                    slug: post.slug,
+                    title: post.title,
+                    body: truncateStr(post.body),
+                    created_at: new Date(post.created_at).toLocaleDateString(
+                        "en-US",
+                        dateOptions
+                    ),
+                    author: post.author,
+                });
+            }
+        });
+    } else if (postsWrapper) {
+        postsWrapper.innerHTML = '<div class="card">No Posts Yet.</div>';
+    }
+});

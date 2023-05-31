@@ -15,7 +15,7 @@ type Post struct {
 	Title    string    `json:"title"`
 	Slug     string    `json:"slug"`
 	Body     string    `json:"body"`
-	Author   string    `json:"author"`
+	Author   int       `json:"author"`
 	Views    int       `json:"views"`
 	Likes    uint64    `json:"likes"`
 	Comments []Comment `json:"comments" gorm:"foreignKey:ID"`

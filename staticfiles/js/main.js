@@ -5,34 +5,6 @@ if (!navigator.cookieEnabled) {
     console.error("Cookies disabled user authentication might break.");
 }
 
-let dropdowns = {};
-
-function dropdownSetup(toggle) {
-    let dropdownToggle = document.getElementById(toggle);
-    if (dropdownToggle) {
-        dropdownToggle.addEventListener("click", function () {
-            let dropdown = document.getElementById(this.dataset.content);
-            if (dropdown.style.display == "block") {
-                dropdown.style.display = "";
-            } else {
-                dropdown.style.display = "block";
-            }
-        });
-
-        dropdowns[toggle] = dropdownToggle.dataset.content;
-    } else {
-        console.error(`Object ${toggle} not found.`);
-    }
-}
-
-window.onclick = function (event) {
-    for (const key in dropdowns) {
-        if (event.target != document.getElementById(key)) {
-            document.getElementById(dropdowns[key]).style.display = "";
-        }
-    }
-};
-
 function setCookie(name, value, daysToLive) {
     const date = new Date();
     // Convert date to milliseconds
@@ -64,11 +36,74 @@ function getCookie(name) {
     return result;
 }
 
+let dropdowns = {};
+
+function dropdownSetup(toggle) {
+    let dropdownToggle = document.getElementById(toggle);
+    if (dropdownToggle) {
+        dropdownToggle.addEventListener("click", function () {
+            let dropdown = document.getElementById(this.dataset.content);
+            if (dropdown.style.display == "block") {
+                dropdown.style.display = "";
+            } else {
+                dropdown.style.display = "block";
+            }
+        });
+
+        dropdowns[toggle] = dropdownToggle.dataset.content;
+    } else {
+        console.error(`Object ${toggle} not found.`);
+    }
+}
+
+window.onclick = function (event) {
+    for (const key in dropdowns) {
+        if (event.target != document.getElementById(key)) {
+            document.getElementById(dropdowns[key]).style.display = "";
+        }
+    }
+};
+
+// https://stackoverflow.com/a/4033310/17673872
+function httpGetAsync(theUrl, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    };
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous
+    xmlHttp.send(null);
+}
+
+function parseTemplate(temp, data) {
+    for (let i = 0; i < temp.length; i++) {
+        // Get variable name in ${} and replace with data
+        if (temp[i] == "$" && temp[i + 1] == "{") {
+            let y = 0;
+            let found = false;
+            for (; y < temp.length; y++) {
+                if (temp[y] == "}") {
+                    found = true;
+                    break;
+                }
+            }
+
+            let variableName = temp.slice(i + 2, y);
+            if (found && variableName in data) {
+                temp =
+                    temp.slice(0, i) + data[variableName] + temp.slice(y + 1);
+            } else {
+                console.error(`Variable does not exist in data\n`);
+            }
+        }
+    }
+
+    return temp;
+}
+
 // setCookie("firstName", "tofs", 7);
 // console.log(document.cookie);
 // console.log(getCookie("firstName"));
-// console.log(getCookie("lastName"));
-
 /*
     Ajax
     fetch(`/posts/${id}/likes`, {

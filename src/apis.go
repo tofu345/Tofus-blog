@@ -56,7 +56,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post.Author = user.Username
+	post.Author = user.ID
 	maxChars := 60
 	post.Slug = post.Title
 	if maxChars < len(post.Slug) {
@@ -100,7 +100,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !userHasPerm(user, "delete_post") && post.Author != user.Username {
+	if !userHasPerm(user, "delete_post") && post.Author != user.ID {
 		JSONError(w, "You do not have permission to delete this")
 		return
 	}
@@ -136,7 +136,7 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !userHasPerm(user, "delete_post") && post.Author != user.Username {
+	if !userHasPerm(user, "delete_post") && post.Author != user.ID {
 		JSONError(w, "You do not have permission to edit this")
 		return
 	}
