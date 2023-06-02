@@ -2,16 +2,6 @@
 <br />
 {{ define "body" }}
 
-<script>
-    let postList = `{{.posts}}`;
-    if (postList != "<no value>") {
-        postList = JSON.parse(postList);
-        postList.sort((a, b) => b.id - a.id);
-    } else {
-        postList = "";
-    }
-</script>
-
 <div>
     <div
         class="text-black flex flex-col-reverse lg:flex-row lg:gap-7 max-w-[73%] mx-auto mt-5"
@@ -38,7 +28,7 @@
                 <div class="h-[100px] m-2 skeleton"></div>
             </div>
         </div>
-        {{ if gt .postLen 0 }}
+        {{ $length := len .posts }} {{ if gt $length 0 }}
         <div class="lg:w-[45%]">
             <!-- Right -->
             <div class="card border">

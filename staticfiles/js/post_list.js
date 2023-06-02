@@ -58,28 +58,33 @@ const dateOptions = {
 };
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    let postsWrapper = document.getElementById("posts");
-    if (postList && postList.length != 0) {
-        httpGetAsync("/static/lib/post.html", (res) => {
-            postsWrapper.innerHTML = "";
+    httpGetAsync("/api/posts", (res) => {
+        let postList = JSON.parse(res);
+        postList = postList.data;
+        postList.sort((a, b) => b.id - a.id);
 
-            for (let key in postList) {
-                let post = postList[key];
-                postsWrapper.innerHTML += parseTemplate(res, {
-                    id: post.id,
-                    likes: formatLikes(post.likes),
-                    slug: post.slug,
-                    title: post.title,
-                    body: truncateStr(post.body),
-                    created_at: new Date(post.created_at).toLocaleDateString(
-                        "en-US",
-                        dateOptions
-                    ),
-                    author: post.author,
-                });
-            }
-        });
-    } else if (postsWrapper) {
-        postsWrapper.innerHTML = '<div class="card">No Posts Yet.</div>';
-    }
+        let postsWrapper = document.getElementById("posts");
+        if (postList.length != 0) {
+            httpGetAsync("/static/lib/post.html", (res) => {
+                postsWrapper.innerHTML = "";
+
+                for (let key in postList) {
+                    let post = postList[key];
+                    postsWrapper.innerHTML += parseTemplate(res, {
+                        id: post.id,
+                        likes: formatLikes(post.likes),
+                        slug: post.slug,
+                        title: post.title,
+                        body: truncateStr(post.body),
+                        created_at: new Date(
+                            post.created_at
+                        ).toLocaleDateString("en-US", dateOptions),
+                        author: post.author,
+                    });
+                }
+            });
+        } else if (postsWrapper) {
+            postsWrapper.innerHTML = '<div class="card">No Posts Yet.</div>';
+        }
+    });
 });

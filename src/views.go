@@ -1,7 +1,6 @@
 package src
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -17,14 +16,8 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json, err := json.Marshal(posts)
-	if err != nil {
-		RenderErrorPage(w, r, err, nil)
-		return
-	}
-
 	RenderTemplate(w, r, "posts/post_list.html",
-		map[string]any{"posts": string(json), "postLen": len(posts)}, &TemplateConfig{NavbarShown: true})
+		map[string]any{"posts": posts}, &TemplateConfig{NavbarShown: true})
 }
 
 func NotFound404Handler(w http.ResponseWriter, r *http.Request) {

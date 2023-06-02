@@ -1,11 +1,13 @@
 package src
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gosimple/slug"
+	"gorm.io/gorm"
 )
 
 func getPostList(w http.ResponseWriter, r *http.Request) {
@@ -13,8 +15,8 @@ func getPostList(w http.ResponseWriter, r *http.Request) {
 
 	postList := []Post{}
 	err := db.Find(&postList).Error
-	if err != nil && err.Error() != RecordNotFound {
-		JSONError(w, err.Error())
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		JSONError(w, err)
 		return
 	}
 
@@ -26,14 +28,14 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -45,18 +47,19 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	user, err := getUserFromRequestApi(w, r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	var post Post
 	err = JSONDecode(r, &post)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
-	post.Author = user.ID
+	post.AuthorID = user.ID
+	post.AuthorName = user.Username
 	maxChars := 60
 	post.Slug = post.Title
 	if maxChars < len(post.Slug) {
@@ -72,7 +75,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	err = db.Create(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -83,31 +86,31 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	user, err := getUserFromRequestApi(w, r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
-	if !userHasPerm(user, "delete_post") && post.Author != user.ID {
-		JSONError(w, "You do not have permission to delete this")
+	if !userHasPerm(user, "delete_post") && post.AuthorID != user.ID {
+		JSONError(w, Unauthorized)
 		return
 	}
 
 	err = db.Delete(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -119,32 +122,32 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 
 	user, err := getUserFromRequestApi(w, r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
-	if !userHasPerm(user, "delete_post") && post.Author != user.ID {
-		JSONError(w, "You do not have permission to edit this")
+	if !userHasPerm(user, "delete_post") && post.AuthorID != user.ID {
+		JSONError(w, Unauthorized)
 		return
 	}
 
 	oldTitle := post.Title
 	err = JSONDecode(r, &post)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -161,7 +164,7 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 
 	err = db.Save(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -172,28 +175,28 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	var comment Comment
 	err = JSONDecode(r, &comment)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
 	post.Comments = append(post.Comments, comment)
 	err = db.Save(&post).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -204,9 +207,11 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := JSONDecode(r, &user)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
+
+	user.AccessToken = GenerateToken(user.Email) // Leaving null causes issues with unique property
 
 	err_map := user.Errors()
 	if len(err_map) != 0 {
@@ -217,14 +222,14 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 	var pswd string
 	pswd, err = HashPassword(user.Password)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 	user.Password = pswd
 
 	err = db.Create(&user).Error
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -232,10 +237,21 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func userList(w http.ResponseWriter, r *http.Request) {
-	users := []User{}
-	err := db.Find(&users).Error
+	user, err := getUserFromRequestApi(w, r)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
+		return
+	}
+
+	if !user.IsAdmin {
+		JSONError(w, Unauthorized)
+		return
+	}
+
+	users := []User{}
+	err = db.Find(&users).Error
+	if err != nil {
+		JSONError(w, err)
 		return
 	}
 
@@ -248,30 +264,26 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 	userData := make(map[string]string)
 	err := JSONDecode(r, &userData)
 	if err != nil {
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
-	errors := map[string]string{}
+	errors_map := map[string]string{}
 	if _, exists := userData["email"]; exists == false {
-		errors["email"] = "This field is required"
+		errors_map["email"] = "This field is required"
 	}
 	if _, exists := userData["password"]; exists == false {
-		errors["password"] = "This field is required"
+		errors_map["password"] = "This field is required"
 	}
-	if len(errors) != 0 {
-		JSONResponse(w, 103, errors, "Error")
+	if len(errors_map) != 0 {
+		JSONResponse(w, 103, errors_map, "Error")
 		return
 	}
 
 	var user User
 	err = db.First(&user, "email = ?", userData["email"]).Error
 	if err != nil {
-		err_str := err.Error()
-		if err_str == RecordNotFound {
-			err_str = LoginError
-		}
-		JSONError(w, err.Error())
+		JSONError(w, err)
 		return
 	}
 
@@ -285,7 +297,7 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 
 	err = db.Save(&user).Error
 	if err != nil {
-		JSONError(w, "Error generating token")
+		JSONError(w, errors.New("Error generating token"))
 		return
 	}
 

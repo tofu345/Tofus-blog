@@ -3,9 +3,8 @@ package src
 import "log"
 
 var permissions = map[string]string{
-	"can_give_perm": "Can Give Permissions to Other Users",
-	"delete_post":   "Can Delete Posts",
-	"update_post":   "Can Update Posts",
+	"delete_post": "Can Delete Posts",
+	"update_post": "Can Update Posts",
 }
 
 func init() {

@@ -13,6 +13,7 @@ import (
 	"text/template"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 type Response struct {
@@ -27,12 +28,13 @@ type TemplateConfig struct {
 
 const (
 	baseUrl = "http://localhost:8005"
+)
 
-	TokenInvalid = "Invalid Token"
-	TokenExpired = "Token Expired"
-
-	RecordNotFound = "record not found"
-	LoginError     = "Incorrect username or password"
+var (
+	TokenInvalid = errors.New("Invalid Token")
+	TokenExpired = errors.New("Token Expired")
+	LoginError   = errors.New("Incorrect username or password")
+	Unauthorized = errors.New("You do not have permission to perform this action")
 )
 
 func getIdFromRequest(req *http.Request) (int, error) {
@@ -43,7 +45,7 @@ func getIdFromRequest(req *http.Request) (int, error) {
 func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
-		return User{}, errors.New(TokenInvalid)
+		return User{}, TokenInvalid
 	}
 
 	token = strings.Split(token, " ")[1]
@@ -58,7 +60,7 @@ func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error)
 func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
 	token, err := r.Cookie("token")
 	if err != nil {
-		return User{}, errors.New(TokenInvalid)
+		return User{}, TokenInvalid
 	}
 
 	user, err := getUserByToken(token.Value)
@@ -75,7 +77,7 @@ func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User
 		return user, err
 	}
 
-	if err.Error() == TokenInvalid || err.Error() == TokenExpired {
+	if errors.Is(err, TokenInvalid) || errors.Is(err, TokenExpired) {
 		url := fmt.Sprintf("%v/login?next=%v", baseUrl, r.URL)
 		http.Redirect(w, r, url, http.StatusSeeOther)
 	} else {
@@ -104,16 +106,17 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 	})
 }
 
-func JSONError(w http.ResponseWriter, err string) {
-	if err == RecordNotFound {
-		err = "Object Not Found"
-	} else if strings.HasPrefix(err, "UNIQUE constraint failed: ") {
+func JSONError(w http.ResponseWriter, err error) {
+	str := err.Error()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		str = "Object Not Found"
+	} else if strings.HasPrefix(str, "UNIQUE constraint failed: ") {
 		// UNIQUE constraint failed: posts.title -> Title is already in use
-		attr := strings.Split(strings.Split(err, ": ")[1], ".")[1]
-		err = strings.Title(attr + " is already in use")
+		attr := strings.Split(strings.Split(str, ": ")[1], ".")[1]
+		str = strings.Title(attr + " is already in use")
 	}
 
-	JSONResponse(w, 103, err, "Error")
+	JSONResponse(w, 103, str, "Error")
 }
 
 func RenderErrorPage(w http.ResponseWriter, r *http.Request, err error, data any) {
@@ -172,7 +175,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, pathToFile string, d
 			return num1 > num2
 		},
 		"userLoggedIn": func(user User) bool {
-			return user.Email != ""
+			return user.ID != 0
 		},
 	}
 

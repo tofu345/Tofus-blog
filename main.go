@@ -10,15 +10,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// ? User Settings Page (not too important rn)
+// ! User logged in middleware
 // ! Pagination
 // ? sort post list by updated_at
-// ! Script to give admin user permissions
 // ! Activity Stream
 // ! Admin Page
 // ! Have post likes be positioned with grid not padding
 // ? Expand post on post list page instead of redirect
 // ? use varaibles in css
-// ! Permissions to view user list api because of passwords
+// ! Permissions to view user list api because of passwords - DONE
 // ! implement something similar to messages in django
 // ! Prevent some fields from being changed via update api e.g. likes and views
 // ? Upload files

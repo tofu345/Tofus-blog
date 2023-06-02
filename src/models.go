@@ -3,6 +3,8 @@ package src
 import (
 	"errors"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type BaseModel struct {
@@ -11,14 +13,15 @@ type BaseModel struct {
 }
 
 type Post struct {
-	ID       int       `gorm:"primarykey" json:"id"`
-	Title    string    `json:"title"`
-	Slug     string    `json:"slug"`
-	Body     string    `json:"body"`
-	Author   int       `json:"author"`
-	Views    int       `json:"views"`
-	Likes    uint64    `json:"likes"`
-	Comments []Comment `json:"comments" gorm:"foreignKey:ID"`
+	ID         int       `gorm:"primarykey" json:"id"`
+	Title      string    `json:"title"`
+	Slug       string    `json:"slug"`
+	Body       string    `json:"body"`
+	AuthorID   int       `json:"author_id"`
+	AuthorName string    `json:"author"`
+	Views      int       `json:"views"`
+	Likes      uint64    `json:"likes"`
+	Comments   []Comment `json:"comments" gorm:"foreignKey:ID"`
 	BaseModel
 }
 
@@ -64,7 +67,8 @@ type User struct {
 	Email           string       `json:"email" gorm:"unique"`
 	AccessToken     string       `json:"-" gorm:"unique"` // Exclude from JSON serialization
 	TokenExpiryDate time.Time    `json:"token_expiry_date"`
-	UserPerms       []Permission `json:"permissions" gorm:"foreignKey:ID"`
+	UserPerms       []Permission `json:"permissions" gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	IsAdmin         bool         `json:"is_admin"`
 	BaseModel
 }
 
@@ -72,15 +76,15 @@ func getUserByToken(token string) (User, error) {
 	var user User
 	err := db.First(&user, "access_token = ?", token).Error
 	if err != nil {
-		if err.Error() == RecordNotFound {
-			return User{}, errors.New(TokenInvalid)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, TokenInvalid
 		}
 		return User{}, err
 	}
 
 	currentTime := time.Now()
 	if user.TokenExpiryDate.Before(currentTime) {
-		return User{}, errors.New(TokenExpired)
+		return User{}, TokenExpired
 	}
 
 	return user, err
