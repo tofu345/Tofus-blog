@@ -41,10 +41,11 @@ func main() {
 	}
 
 	user := src.User{
+		FirstName:   username,
 		Username:    username,
 		Password:    password,
 		Email:       email,
-		AccessToken: src.GenerateToken(email), // Leaving null causes issues with unique property
+		AccessToken: email, // Leaving null causes issues with unique property
 		IsAdmin:     true,
 	}
 

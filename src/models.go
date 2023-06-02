@@ -63,7 +63,7 @@ type User struct {
 	FirstName       string       `json:"first_name"`
 	LastName        string       `json:"last_name"`
 	Username        string       `json:"username" gorm:"unique"`
-	Password        string       `json:"password"`
+	Password        string       `json:"-"`
 	Email           string       `json:"email" gorm:"unique"`
 	AccessToken     string       `json:"-" gorm:"unique"` // Exclude from JSON serialization
 	TokenExpiryDate time.Time    `json:"token_expiry_date"`
@@ -82,8 +82,7 @@ func getUserByToken(token string) (User, error) {
 		return User{}, err
 	}
 
-	currentTime := time.Now()
-	if user.TokenExpiryDate.Before(currentTime) {
+	if user.TokenExpiryDate.Before(time.Now()) {
 		return User{}, TokenExpired
 	}
 

@@ -204,14 +204,21 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func userSignup(w http.ResponseWriter, r *http.Request) {
-	var user User
-	err := JSONDecode(r, &user)
+	var userData map[string]string
+	err := JSONDecode(r, &userData)
 	if err != nil {
 		JSONError(w, err)
 		return
 	}
 
-	user.AccessToken = GenerateToken(user.Email) // Leaving null causes issues with unique property
+	user := User{
+		Username:    userData["username"],
+		Email:       userData["email"],
+		Password:    userData["password"],
+		FirstName:   userData["first_name"],
+		LastName:    userData["last_name"],
+		AccessToken: userData["email"], // Leaving null causes issues with unique property
+	}
 
 	err_map := user.Errors()
 	if len(err_map) != 0 {
@@ -249,7 +256,7 @@ func userList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	users := []User{}
-	err = db.Find(&users).Error
+	err = db.Find(&users).Preload("Permissions").Error
 	if err != nil {
 		JSONError(w, err)
 		return

@@ -217,7 +217,14 @@ function msgTemplate(id, title, content, className, svg) {
     </div>`;
 }
 
-function createMessage(title, content, timeout, className, svg) {
+function createSimpleMessage(title, content, timeout, className, svg) {
+    if (!className && !svg) {
+        console.warn(
+            "This function is for internal use only\nUse create(Success/Error/Warning/Info)Message functions instead"
+        );
+        return;
+    }
+
     let msgWrapper = document.getElementById("wb-msg-wrapper");
     if (!msgWrapper) {
         console.error("Object 'wb-msg-wrapper' not found");
@@ -236,7 +243,7 @@ function createMessage(title, content, timeout, className, svg) {
         content = defaultContent;
     }
     if (content.length > 10000) {
-        console.warn("Message Content too long\n" + content);
+        console.warn("! Message Content too long\n" + content);
     }
     msgWrapper.innerHTML += msgTemplate(id, title, content, className, svg);
     setTimeout(() => {
@@ -257,7 +264,7 @@ function createInfoMessage(
     className = "wb-info-msg",
     svg = infoSvg
 ) {
-    createMessage(title, content, timeout, className, svg);
+    createSimpleMessage(title, content, timeout, className, svg);
 }
 
 function createWarningMessage(
@@ -267,7 +274,7 @@ function createWarningMessage(
     className = "wb-warning-msg",
     svg = warningSvg
 ) {
-    createMessage(title, content, timeout, className, svg);
+    createSimpleMessage(title, content, timeout, className, svg);
 }
 
 function createErrorMessage(
@@ -277,7 +284,7 @@ function createErrorMessage(
     className = "wb-error-msg",
     svg = errorSvg
 ) {
-    createMessage(title, content, timeout, className, svg);
+    createSimpleMessage(title, content, timeout, className, svg);
 }
 
 function createSuccessMessage(
@@ -287,5 +294,5 @@ function createSuccessMessage(
     className = "wb-success-msg",
     svg = successSvg
 ) {
-    createMessage(title, content, timeout, className, svg);
+    createSimpleMessage(title, content, timeout, className, svg);
 }

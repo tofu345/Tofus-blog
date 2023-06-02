@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// ? Update SimpleMessages to match website UI
 // ? User Settings Page (not too important rn)
 // ! User logged in middleware
 // ! Pagination
