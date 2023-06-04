@@ -58,19 +58,28 @@ const dateOptions = {
 };
 
 document.addEventListener("DOMContentLoaded", function (event) {
+    let postsElement = document.getElementById("posts");
+    if (postsElement == null) {
+        return;
+    }
+
     httpGetAsync("/api/posts", (res) => {
-        let postList = JSON.parse(res);
-        postList = postList.data;
-        postList.sort((a, b) => b.id - a.id);
+        let objs = JSON.parse(res);
+        if (objs.responseCode != 100) {
+            createSimpleMessage("Error fetching posts");
+            console.error("Error:", objs);
+            return;
+        }
 
-        let postsWrapper = document.getElementById("posts");
-        if (postList.length != 0) {
+        objs = objs.data;
+        objs.sort((a, b) => b.id - a.id);
+
+        if (objs.length != 0) {
             httpGetAsync("/static/lib/post.html", (res) => {
-                postsWrapper.innerHTML = "";
-
-                for (let key in postList) {
-                    let post = postList[key];
-                    postsWrapper.innerHTML += parseTemplate(res, {
+                postsElement.innerHTML = "";
+                for (let key in objs) {
+                    let post = objs[key];
+                    postsElement.innerHTML += parseTemplate(res, {
                         id: post.id,
                         likes: formatLikes(post.likes),
                         slug: post.slug,
@@ -83,8 +92,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     });
                 }
             });
-        } else if (postsWrapper) {
-            postsWrapper.innerHTML = '<div class="card">No Posts Yet.</div>';
+        } else {
+            postsElement.innerHTML = '<div class="card">No Posts Yet.</div>';
         }
     });
 });
