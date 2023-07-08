@@ -10,7 +10,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ? Update SimpleMessages to match website UI
+// ! Rework accesstoken
+// ! Show comments
+// ? Generate HTML for post_detail page with js like post_list page
+// ??? Store post list in localstorage and refresh periodically
+// ? Password required scripts
+// ? Change background image for error page
 // ? User Settings Page (not too important rn)
 // ! User logged in middleware
 // ! Pagination

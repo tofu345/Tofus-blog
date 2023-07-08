@@ -76,7 +76,7 @@ function httpGetAsync(theUrl, callback) {
 }
 
 function parseTemplate(temp, data) {
-    for (let i = 0; i < temp.length; i++) {
+    for (let i = 0; i + 1 < temp.length; i++) {
         // Get variable name in ${} and replace with data
         if (temp[i] == "$" && temp[i + 1] == "{") {
             let y = 0;

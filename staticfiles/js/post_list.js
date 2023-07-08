@@ -28,26 +28,15 @@ function formatLikes(likes) {
     return `${Math.floor(likes / 1000000)}M`;
 }
 
-let postLikes = document.getElementsByClassName("post-like");
-for (let item of postLikes) {
-    item.innerHTML = formatLikes(item.innerHTML);
-}
+const maxLen = 500;
 
-function truncateStr(string, maxLen) {
-    if (!maxLen) {
-        maxLen = 500;
-    }
+function truncateStr(string) {
     let len = string.length;
     string = string.substring(0, maxLen);
     if (len > maxLen) {
         string += "...";
     }
     return string;
-}
-
-let postBody = document.getElementsByClassName("post-body");
-for (let item of postBody) {
-    item.innerHTML = truncateStr(item.innerHTML, 500);
 }
 
 const dateOptions = {
@@ -57,6 +46,9 @@ const dateOptions = {
     day: "numeric",
 };
 
+let postList = [];
+let focusedPost;
+
 document.addEventListener("DOMContentLoaded", function (event) {
     let postsElement = document.getElementById("posts");
     if (postsElement == null) {
@@ -64,36 +56,39 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
 
     httpGetAsync("/api/posts", (res) => {
-        let objs = JSON.parse(res);
-        if (objs.responseCode != 100) {
-            createSimpleMessage("Error fetching posts");
-            console.error("Error:", objs);
+        res = JSON.parse(res);
+        if (res.responseCode != 100) {
+            createErrorNotif("Error fetching posts");
+            console.error(res);
             return;
         }
 
-        objs = objs.data;
-        objs.sort((a, b) => b.id - a.id);
+        postList = res.data;
+        postList.sort((a, b) => a.id - b.id);
 
-        if (objs.length != 0) {
-            httpGetAsync("/static/lib/post.html", (res) => {
-                postsElement.innerHTML = "";
-                for (let key in objs) {
-                    let post = objs[key];
-                    postsElement.innerHTML += parseTemplate(res, {
-                        id: post.id,
-                        likes: formatLikes(post.likes),
-                        slug: post.slug,
-                        title: post.title,
-                        body: truncateStr(post.body),
-                        created_at: new Date(
-                            post.created_at
-                        ).toLocaleDateString("en-US", dateOptions),
-                        author: post.author,
-                    });
-                }
-            });
-        } else {
+        // console.log(postList);
+
+        if (postList.length == 0) {
             postsElement.innerHTML = '<div class="card">No Posts Yet.</div>';
+            return;
         }
+
+        httpGetAsync("/static/lib/post.html", (res) => {
+            postsElement.innerHTML = "";
+            postList.forEach((post) => {
+                postsElement.innerHTML += parseTemplate(res, {
+                    id: post.id,
+                    likes: formatLikes(post.likes),
+                    slug: post.slug,
+                    title: post.title,
+                    body: truncateStr(post.body),
+                    created_at: new Date(post.created_at).toLocaleDateString(
+                        "en-US",
+                        dateOptions
+                    ),
+                    author: post.author,
+                });
+            });
+        });
     });
 });

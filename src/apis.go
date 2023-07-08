@@ -290,6 +290,9 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err = db.First(&user, "email = ?", userData["email"]).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = errors.New("User Not Found")
+		}
 		JSONError(w, err)
 		return
 	}

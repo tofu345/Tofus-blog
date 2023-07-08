@@ -64,13 +64,14 @@ div:hover > div.dropdown-toggle-wrapper {
 
 .notif {
     font-family: "Mulish" !important;
-    border-radius: 5px 5px 7px 7px;
-    width: 25rem;
+    border-radius: 5px 5px 7px 6px;
+    width: 22rem;
     margin: 0.5rem;
     overflow: hidden;
     position: relative;
-    background: #eaeaea;
+    background: #f2f2f2;
     backdrop-filter: blur(11.2055px);
+    border: 1px solid #d9d9d9;
     transform: translateX(0);
 }
 
@@ -106,7 +107,7 @@ div:hover > div.dropdown-toggle-wrapper {
     padding-right: 15px;
     margin: 7px 15px 10px 14px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     font-size: 15px;
     line-height: 20px;
 }

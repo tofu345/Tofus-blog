@@ -1,6 +1,5 @@
 const notifWrapperId = "notif-wrapper";
-
-let notifs = [];
+const notifTypes = ["info", "error"];
 
 function hideMessage(id) {
     try {
@@ -32,12 +31,15 @@ function msgTemplate(id, type, msg) {
     </div>`;
 }
 
-function createSimpleMessage(msg, type = "info", timeout) {
+function createNotif(msg, type = "info", timeout) {
     let msgWrapper = document.getElementById(notifWrapperId);
     if (!msgWrapper) {
         console.error(`Object ${notifWrapperId} not found`);
     }
-
+    if (!notifTypes.includes(type)) {
+        type = "info";
+        console.warn(`${type} is not a valid notif type`);
+    }
     if (!msg) {
         msg = `Lorem ipsum dolor sit amet, consectetur adipisicing elit. 
             Adipisc ipsam, earum nam expedita alias aspernatur id harum fugit nemo iure
@@ -47,8 +49,7 @@ function createSimpleMessage(msg, type = "info", timeout) {
         console.warn("! Message Content too long\n" + msg);
     }
 
-    let id = notifs.length;
-    notifs.push(msg);
+    let id = Math.floor(Math.random() * 1000);
     msgWrapper.innerHTML = msgTemplate(id, type, msg) + msgWrapper.innerHTML;
     setTimeout(() => {
         const ele = document.getElementById(`notif-${id}`);
@@ -59,4 +60,8 @@ function createSimpleMessage(msg, type = "info", timeout) {
             setTimeout(() => hideMessage("msg-" + id), timeout * 1000);
         }
     }, 600);
+}
+
+function createErrorNotif(msg, timeout) {
+    createNotif(msg, "error", timeout);
 }

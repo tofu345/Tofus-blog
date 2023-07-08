@@ -106,7 +106,7 @@ func JSONResponse(w http.ResponseWriter, responseCode int, data any, message str
 	})
 }
 
-func JSONError(w http.ResponseWriter, err error) {
+func ParseError(err error) error {
 	str := err.Error()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		str = "Object Not Found"
@@ -116,7 +116,11 @@ func JSONError(w http.ResponseWriter, err error) {
 		str = strings.Title(attr + " is already in use")
 	}
 
-	JSONResponse(w, 103, str, "Error")
+	return errors.New(str)
+}
+
+func JSONError(w http.ResponseWriter, err error) {
+	JSONResponse(w, 103, ParseError(err).Error(), "Error")
 }
 
 func RenderErrorPage(w http.ResponseWriter, r *http.Request, err error, data any) {
