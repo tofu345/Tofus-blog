@@ -47,7 +47,6 @@ const dateOptions = {
 };
 
 let postList = [];
-let focusedPost;
 
 document.addEventListener("DOMContentLoaded", function (event) {
     let postsElement = document.getElementById("posts");

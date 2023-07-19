@@ -1,10 +1,7 @@
 package src
 
 import (
-	"errors"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type BaseModel struct {
@@ -65,28 +62,10 @@ type User struct {
 	Username        string       `json:"username" gorm:"unique"`
 	Password        string       `json:"-"`
 	Email           string       `json:"email" gorm:"unique"`
-	AccessToken     string       `json:"-" gorm:"unique"` // Exclude from JSON serialization
 	TokenExpiryDate time.Time    `json:"token_expiry_date"`
 	UserPerms       []Permission `json:"permissions" gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	IsAdmin         bool         `json:"is_admin"`
 	BaseModel
-}
-
-func getUserByToken(token string) (User, error) {
-	var user User
-	err := db.First(&user, "access_token = ?", token).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return User{}, TokenInvalid
-		}
-		return User{}, err
-	}
-
-	if user.TokenExpiryDate.Before(time.Now()) {
-		return User{}, TokenExpired
-	}
-
-	return user, err
 }
 
 func (user *User) Errors() map[string]string {

@@ -83,7 +83,7 @@ div:hover > div.dropdown-toggle-wrapper {
     padding: 4px;
     border-radius: 20%;
     cursor: pointer;
-    background-color: #eaeaea;
+    background-color: transparent;
     display: none;
 }
 

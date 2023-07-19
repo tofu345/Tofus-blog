@@ -23,7 +23,7 @@ function validateLoginForm(event) {
         return;
     }
 
-    fetch("/api/login", {
+    fetch("/api/token", {
         method: "POST",
         body: JSON.stringify(object),
     })
@@ -37,7 +37,8 @@ function validateLoginForm(event) {
                 return;
             }
 
-            setCookie("token", res.data.token, 7);
+            setCookie("access", res.access, 7);
+            setCookie("refresh", res.refresh, 7);
 
             if (urlParams.get("next")) {
                 window.location.href = baseURL + urlParams.get("next");

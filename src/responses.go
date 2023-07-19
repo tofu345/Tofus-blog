@@ -16,11 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Response struct {
-	ResponseCode int    `json:"responseCode"`
-	Message      string `json:"message"`
-	Data         any    `json:"data"`
-}
+type dict map[string]any
 
 type TemplateConfig struct {
 	NavbarShown bool
@@ -30,45 +26,18 @@ const (
 	baseUrl = "http://localhost:8005"
 )
 
-var (
-	TokenInvalid = errors.New("Invalid Token")
-	TokenExpired = errors.New("Token Expired")
-	LoginError   = errors.New("Incorrect username or password")
-	Unauthorized = errors.New("You do not have permission to perform this action")
-)
-
-func getIdFromRequest(req *http.Request) (int, error) {
+func idParam(req *http.Request) (int, error) {
 	vars := mux.Vars(req)
 	return strconv.Atoi(vars["id"])
 }
 
-func getUserFromRequestApi(w http.ResponseWriter, r *http.Request) (User, error) {
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		return User{}, TokenInvalid
-	}
-
-	token = strings.Split(token, " ")[1]
-	user, err := getUserByToken(token)
-	if err != nil {
-		return User{}, err
-	}
-
-	return user, nil
-}
-
 func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
-	token, err := r.Cookie("token")
+	token, err := r.Cookie("access")
 	if err != nil {
-		return User{}, TokenInvalid
+		return User{}, InvalidToken
 	}
 
-	user, err := getUserByToken(token.Value)
-	if err != nil {
-		return User{}, err
-	}
-
-	return user, nil
+	return userFromToken(token.Value)
 }
 
 func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User, error) {
@@ -77,7 +46,7 @@ func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User
 		return user, err
 	}
 
-	if errors.Is(err, TokenInvalid) || errors.Is(err, TokenExpired) {
+	if errors.Is(err, InvalidToken) || errors.Is(err, TokenExpired) {
 		url := fmt.Sprintf("%v/login?next=%v", baseUrl, r.URL)
 		http.Redirect(w, r, url, http.StatusSeeOther)
 	} else {
@@ -89,38 +58,41 @@ func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User
 	return user, err
 }
 
-// responseCode: 103 - Bad, 100 - Good
-func JSONResponse(w http.ResponseWriter, responseCode int, data any, message string) {
+func Response(w http.ResponseWriter, code int, data dict) {
 	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(code)
 
-	if responseCode == 103 {
-		w.WriteHeader(http.StatusBadRequest)
-	} else if responseCode == 100 {
-		w.WriteHeader(http.StatusOK)
+	if code == 200 {
+		data["responseCode"] = 100
+	} else {
+		data["responseCode"] = 103
 	}
 
-	json.NewEncoder(w).Encode(Response{
-		ResponseCode: responseCode,
-		Data:         data,
-		Message:      message,
-	})
+	json.NewEncoder(w).Encode(data)
 }
 
-func ParseError(err error) error {
+func ParseError(err error) string {
 	str := err.Error()
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		str = "Object Not Found"
-	} else if strings.HasPrefix(str, "UNIQUE constraint failed: ") {
-		// UNIQUE constraint failed: posts.title -> Title is already in use
-		attr := strings.Split(strings.Split(str, ": ")[1], ".")[1]
-		str = strings.Title(attr + " is already in use")
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		str = "Object not found"
+	case strings.HasPrefix(str, "UNIQUE constraint failed: "):
+		str = strings.Split(str, ": ")[1] + " is already in use"
 	}
 
-	return errors.New(str)
+	return str
 }
 
-func JSONError(w http.ResponseWriter, err error) {
-	JSONResponse(w, 103, ParseError(err).Error(), "Error")
+func JSONError(w http.ResponseWriter, err any) {
+	switch err.(type) {
+	case error:
+		err = ParseError(err.(error))
+	}
+	Response(w, 400, dict{"message": "An Error Occured", "error": err})
+}
+
+func JSONDecode(r *http.Request, data any) error {
+	return json.NewDecoder(r.Body).Decode(data)
 }
 
 func RenderErrorPage(w http.ResponseWriter, r *http.Request, err error, data any) {
@@ -128,13 +100,6 @@ func RenderErrorPage(w http.ResponseWriter, r *http.Request, err error, data any
 
 	RenderTemplate(w, r, "error.html",
 		map[string]any{"data": data, "err": err.Error()}, &TemplateConfig{})
-}
-
-// Decodes request body into data
-//
-// data must be a pointer
-func JSONDecode(r *http.Request, data any) error {
-	return json.NewDecoder(r.Body).Decode(data)
 }
 
 func parseFiles(funcs template.FuncMap, filenames ...string) (*template.Template, error) {

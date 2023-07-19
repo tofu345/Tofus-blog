@@ -4,10 +4,13 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"syscall"
-	"tofs-blog/src"
+
+	"github.com/joho/godotenv"
+	"github.com/tofu345/Tofus-blog/src"
 
 	"golang.org/x/term"
 	"gorm.io/gorm"
@@ -31,10 +34,15 @@ type Script struct {
 
 func init() {
 	db = src.GetDB()
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
-	fmt.Println("? 'help' to view list of useful commands")
+	fmt.Println("? 'help' to view list of commands")
 
 	for {
 		input := getUserInput("> ")
@@ -46,7 +54,14 @@ func main() {
 			fmt.Println("list\tlist all commands")
 			fmt.Println("exit\tquit")
 		case "list":
-			displayScripts()
+			if len(scripts) == 0 {
+				fmt.Println("! There are no scripts")
+				return
+			}
+
+			for _, v := range scripts {
+				fmt.Printf("%v\t%v\n", v.name, v.description)
+			}
 		case "e", "exit":
 			return
 		default:
@@ -58,17 +73,6 @@ func main() {
 
 			script.function()
 		}
-	}
-}
-
-func displayScripts() {
-	if len(scripts) == 0 {
-		fmt.Println("! There are no scripts")
-		return
-	}
-
-	for _, v := range scripts {
-		fmt.Printf("%v\t%v\n", v.name, v.description)
 	}
 }
 
@@ -110,7 +114,7 @@ func adminLogin() (src.User, error) {
 	admin := src.User{}
 	err := db.Where("email = ?", email).Find(&admin).Error
 	if err != nil {
-		return src.User{}, src.ParseError(err)
+		return src.User{}, err
 	}
 
 	if admin.ID == 0 {
@@ -141,13 +145,12 @@ func adminLogin() (src.User, error) {
 	return admin, nil
 }
 
-func fmtFatal(err error) {
+func Fatal(err error) {
 	fmt.Printf("! %v\n", err)
 	os.Exit(0)
 }
 
 // Scripts
-
 func createAdmin() {
 	admins := []src.User{}
 	err := db.Where("is_admin <> ?", "jinzhu").Find(&admins).Error
@@ -155,7 +158,7 @@ func createAdmin() {
 	if len(admins) != 0 {
 		_, err := adminLogin()
 		if err != nil {
-			fmtFatal(err)
+			Fatal(err)
 		}
 	}
 
@@ -167,29 +170,28 @@ func createAdmin() {
 	fmt.Print("> Password: ")
 	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
-		fmtFatal(err)
+		Fatal(err)
 	}
 	password := string(bytePassword)
 	fmt.Println()
 
 	password, err = src.HashPassword(password)
 	if err != nil {
-		fmtFatal(err)
+		Fatal(err)
 		return
 	}
 
 	user := src.User{
-		FirstName:   username,
-		Username:    username,
-		Password:    password,
-		Email:       email,
-		AccessToken: email, // Leaving null causes issues with unique property
-		IsAdmin:     true,
+		FirstName: username,
+		Username:  username,
+		Password:  password,
+		Email:     email,
+		IsAdmin:   true,
 	}
 
 	err = db.Create(&user).Error
 	if err != nil {
-		fmtFatal(err)
+		Fatal(err)
 		return
 	}
 
@@ -199,7 +201,7 @@ func createAdmin() {
 func giveAdminPerm() {
 	admin, err := adminLogin()
 	if err != nil {
-		fmtFatal(err)
+		Fatal(err)
 	}
 
 	fmt.Println(">> Give User Admin Permissions")
@@ -208,7 +210,7 @@ func giveAdminPerm() {
 	var user src.User
 	err = db.First(&user, "email = ?", user_email).Error
 	if err != nil {
-		fmtFatal(src.ParseError(err))
+		Fatal(err)
 	}
 
 	input := getUserInput(fmt.Sprintf("> Give %v admin permissions? (y/n): ", user.Username))

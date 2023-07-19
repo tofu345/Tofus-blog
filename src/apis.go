@@ -2,31 +2,28 @@ package src
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
-func getPostList(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-
+func postList(w http.ResponseWriter, r *http.Request) {
 	postList := []Post{}
 	err := db.Find(&postList).Error
+	// ErrRecordNotFound if no posts
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		JSONError(w, err)
 		return
 	}
 
-	JSONResponse(w, 100, postList, "Post List")
+	Response(w, 200, dict{"message": "Post list", "data": postList})
 }
 
-func getPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-
-	id, err := getIdFromRequest(r)
+func postDetail(w http.ResponseWriter, r *http.Request) {
+	id, err := idParam(r)
 	if err != nil {
 		JSONError(w, err)
 		return
@@ -39,13 +36,11 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, post, "Post Detail")
+	Response(w, 200, dict{"message": "Post detail", "data": post})
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-
-	user, err := getUserFromRequestApi(w, r)
+	user, err := userFromBearer(w, r)
 	if err != nil {
 		JSONError(w, err)
 		return
@@ -69,7 +64,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	post.Slug = slug.Make(post.Slug)
 	err_map := post.Errors()
 	if len(err_map) != 0 {
-		JSONResponse(w, 103, err_map, "Error")
+		JSONError(w, err_map)
 		return
 	}
 
@@ -79,18 +74,17 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, post, "Success")
+	Response(w, 200, dict{"message": "Post created", "data": post})
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-	id, err := getIdFromRequest(r)
+	id, err := idParam(r)
 	if err != nil {
 		JSONError(w, err)
 		return
 	}
 
-	user, err := getUserFromRequestApi(w, r)
+	user, err := userFromBearer(w, r)
 	if err != nil {
 		JSONError(w, err)
 		return
@@ -114,19 +108,17 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, nil, "Success")
+	Response(w, 200, dict{"message": "Post deleted"})
 }
 
 func updatePost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-
-	user, err := getUserFromRequestApi(w, r)
+	user, err := userFromBearer(w, r)
 	if err != nil {
 		JSONError(w, err)
 		return
 	}
 
-	id, err := getIdFromRequest(r)
+	id, err := idParam(r)
 	if err != nil {
 		JSONError(w, err)
 		return
@@ -158,7 +150,7 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 
 	errs := post.Errors()
 	if len(errs) != 0 {
-		JSONResponse(w, 103, errs, "Error")
+		JSONError(w, errs)
 		return
 	}
 
@@ -168,12 +160,11 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, post, "Success")
+	Response(w, 200, dict{"message": "Post updated", "data": post})
 }
 
 func createComment(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-	id, err := getIdFromRequest(r)
+	id, err := idParam(r)
 	if err != nil {
 		JSONError(w, err)
 		return
@@ -200,7 +191,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, post, "Success")
+	Response(w, 200, dict{"message": "Comment created", "data": post})
 }
 
 func userSignup(w http.ResponseWriter, r *http.Request) {
@@ -212,17 +203,16 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := User{
-		Username:    userData["username"],
-		Email:       userData["email"],
-		Password:    userData["password"],
-		FirstName:   userData["first_name"],
-		LastName:    userData["last_name"],
-		AccessToken: userData["email"], // Leaving null causes issues with unique property
+		Username:  userData["username"],
+		Email:     userData["email"],
+		Password:  userData["password"],
+		FirstName: userData["first_name"],
+		LastName:  userData["last_name"],
 	}
 
 	err_map := user.Errors()
 	if len(err_map) != 0 {
-		JSONResponse(w, 103, err_map, "Error")
+		JSONError(w, err_map)
 		return
 	}
 
@@ -240,11 +230,11 @@ func userSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, user, "Success")
+	Response(w, 200, dict{"message": "User created", "data": user})
 }
 
 func userList(w http.ResponseWriter, r *http.Request) {
-	user, err := getUserFromRequestApi(w, r)
+	user, err := userFromBearer(w, r)
 	if err != nil {
 		JSONError(w, err)
 		return
@@ -262,13 +252,11 @@ func userList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONResponse(w, 100, users, "User List")
+	Response(w, 200, dict{"message": "User list", "data": users})
 }
 
-func userLogin(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
-
-	userData := make(map[string]string)
+func getAccessToken(w http.ResponseWriter, r *http.Request) {
+	userData := map[string]string{}
 	err := JSONDecode(r, &userData)
 	if err != nil {
 		JSONError(w, err)
@@ -276,23 +264,20 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	errors_map := map[string]string{}
-	if _, exists := userData["email"]; exists == false {
+	if _, exists := userData["email"]; !exists {
 		errors_map["email"] = "This field is required"
 	}
-	if _, exists := userData["password"]; exists == false {
+	if _, exists := userData["password"]; !exists {
 		errors_map["password"] = "This field is required"
 	}
 	if len(errors_map) != 0 {
-		JSONResponse(w, 103, errors_map, "Error")
+		JSONError(w, errors_map)
 		return
 	}
 
 	var user User
 	err = db.First(&user, "email = ?", userData["email"]).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = errors.New("User Not Found")
-		}
 		JSONError(w, err)
 		return
 	}
@@ -302,14 +287,57 @@ func userLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.AccessToken = GenerateToken(user.Email)
-	user.TokenExpiryDate = time.Now().Add(7 * 24 * time.Hour) // Token expires in 7 days
-
-	err = db.Save(&user).Error
+	access, err := newAccessToken(user.Username)
 	if err != nil {
-		JSONError(w, errors.New("Error generating token"))
+		JSONError(w, "Error Generating Token")
 		return
 	}
 
-	JSONResponse(w, 100, map[string]any{"token": user.AccessToken}, "Success")
+	refresh, err := newRefreshToken(user.Username)
+	if err != nil {
+		JSONError(w, "Error Generating Token")
+		return
+	}
+
+	Response(w, 200, dict{"access": access, "refresh": refresh})
+}
+
+func refreshAccessToken(w http.ResponseWriter, r *http.Request) {
+	var data map[string]string
+	err := JSONDecode(r, &data)
+	if err != nil {
+		JSONError(w, err)
+		return
+	}
+
+	if _, exists := data["token"]; !exists {
+		JSONError(w, dict{"token": "This field is required"})
+		return
+	}
+
+	payload, err := decodeToken(data["token"])
+	if err != nil {
+		JSONError(w, err)
+		return
+	}
+
+	if _, exists := payload["ref"]; !exists {
+		fmt.Println(payload)
+		JSONError(w, InvalidToken)
+		return
+	}
+
+	username := payload["username"]
+
+	switch username.(type) {
+	case string:
+		access, err := newAccessToken(username.(string))
+		if err != nil {
+			JSONError(w, err)
+			return
+		}
+		Response(w, 200, dict{"access": access})
+	default:
+		JSONError(w, InvalidToken)
+	}
 }

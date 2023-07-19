@@ -17,10 +17,13 @@ func RegisterRoutes(r *mux.Router) {
 	routes := []Route{
 		// Views
 		{url: "/", methods: []string{"GET"}, function: homeView},
+		{url: "/login", methods: []string{"GET"}, function: loginView},
+		{url: "/signup", methods: []string{"GET"}, function: signUpView},
+		{url: "/posts/{id}/{slug}", methods: []string{"GET"}, function: postDetailView},
 
 		// Api's
-		{url: "/api/posts", methods: []string{"GET"}, function: getPostList},
-		{url: "/api/posts/{id}", methods: []string{"GET"}, function: getPost},
+		{url: "/api/posts", methods: []string{"GET"}, function: postList},
+		{url: "/api/posts/{id}", methods: []string{"GET"}, function: postDetail},
 		{url: "/api/posts/{id}/comments", methods: []string{"POST"}, function: createComment},
 		{url: "/api/create", methods: []string{"POST"}, function: createPost},
 		{url: "/api/delete/{id}", methods: []string{"DELETE"}, function: deletePost},
@@ -28,11 +31,8 @@ func RegisterRoutes(r *mux.Router) {
 
 		{url: "/api/users", methods: []string{"GET"}, function: userList},
 		{url: "/api/signup", methods: []string{"POST"}, function: userSignup},
-		{url: "/api/login", methods: []string{"POST"}, function: userLogin},
-
-		{url: "/login", methods: []string{"GET"}, function: loginView},
-		{url: "/signup", methods: []string{"GET"}, function: signUpView},
-		{url: "/posts/{id}/{slug}", methods: []string{"GET"}, function: postDetailView},
+		{url: "/api/token", methods: []string{"POST"}, function: getAccessToken},
+		{url: "/api/token/refresh", methods: []string{"POST"}, function: refreshAccessToken},
 	}
 
 	// Static Files

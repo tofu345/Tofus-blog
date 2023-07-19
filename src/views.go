@@ -1,11 +1,8 @@
 package src
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 func homeView(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +12,12 @@ func homeView(w http.ResponseWriter, r *http.Request) {
 		RenderErrorPage(w, r, err, nil)
 		return
 	}
+
+	// user, err := getUserFromRequest(w, r)
+	// if err != nil {
+	// 	http.Redirect(w, r, baseUrl, http.StatusSeeOther)
+	// 	return
+	// }
 
 	RenderTemplate(w, r, "posts/post_list.html",
 		map[string]any{"posts": posts}, &TemplateConfig{NavbarShown: true})
@@ -29,13 +32,16 @@ func NotFound404Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postDetailView(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	slug := params["slug"]
-
-	post, err := GetPostBySlug(slug)
+	id, err := idParam(r)
 	if err != nil {
-		RenderErrorPage(w, r, errors.New("Post Not Found"),
-			fmt.Sprintf("No post with slug %v was found", slug))
+		JSONError(w, err)
+		return
+	}
+
+	post := Post{ID: id}
+	err = db.First(&post).Error
+	if err != nil {
+		RenderErrorPage(w, r, ObjectNotFound, fmt.Sprintf("No post with id %v was found", id))
 		return
 	}
 
@@ -51,9 +57,11 @@ func loginView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(err)
+
 	RenderTemplate(w, r, "login.html", map[string]any{}, &TemplateConfig{})
 }
 
 func signUpView(w http.ResponseWriter, r *http.Request) {
-	JSONResponse(w, 103, nil, "Not implemented")
+	Response(w, 400, dict{"message": "Not implemented"})
 }

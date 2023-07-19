@@ -1,6 +1,8 @@
 package src
 
-import "log"
+import (
+	"log"
+)
 
 var permissions = map[string]string{
 	"delete_post": "Can Delete Posts",

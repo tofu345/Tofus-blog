@@ -18,7 +18,8 @@ function deleteCookie(name) {
 }
 
 function logout() {
-    deleteCookie("token");
+    deleteCookie("access");
+    deleteCookie("refresh");
     window.location.href = baseURL + "/login";
 }
 
