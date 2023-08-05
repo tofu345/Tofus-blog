@@ -34,7 +34,7 @@ func idParam(req *http.Request) (int, error) {
 func getUserFromRequest(w http.ResponseWriter, r *http.Request) (User, error) {
 	token, err := r.Cookie("access")
 	if err != nil {
-		return User{}, InvalidToken
+		return User{}, ErrInvalidToken
 	}
 
 	return userFromToken(token.Value)
@@ -46,7 +46,7 @@ func getUserFromRequestAndRedirect(w http.ResponseWriter, r *http.Request) (User
 		return user, err
 	}
 
-	if errors.Is(err, InvalidToken) || errors.Is(err, TokenExpired) {
+	if errors.Is(err, ErrInvalidToken) || errors.Is(err, ErrTokenExpired) {
 		url := fmt.Sprintf("%v/login?next=%v", baseUrl, r.URL)
 		http.Redirect(w, r, url, http.StatusSeeOther)
 	} else {
@@ -84,9 +84,10 @@ func ParseError(err error) string {
 }
 
 func JSONError(w http.ResponseWriter, err any) {
-	switch err.(type) {
+	switch err := err.(type) {
 	case error:
-		err = ParseError(err.(error))
+		Response(w, 400, dict{"message": "An Error Occured", "error": ParseError(err)})
+		return
 	}
 	Response(w, 400, dict{"message": "An Error Occured", "error": err})
 }

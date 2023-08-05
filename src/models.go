@@ -56,15 +56,15 @@ type Permission struct {
 }
 
 type User struct {
-	ID              int          `gorm:"primarykey" json:"id"`
-	FirstName       string       `json:"first_name"`
-	LastName        string       `json:"last_name"`
-	Username        string       `json:"username" gorm:"unique"`
-	Password        string       `json:"-"`
-	Email           string       `json:"email" gorm:"unique"`
-	TokenExpiryDate time.Time    `json:"token_expiry_date"`
-	UserPerms       []Permission `json:"permissions" gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	IsAdmin         bool         `json:"is_admin"`
+	ID              int       `gorm:"primarykey" json:"id"`
+	FirstName       string    `json:"first_name"`
+	LastName        string    `json:"last_name"`
+	Username        string    `json:"username" gorm:"unique"`
+	Password        string    `json:"-"`
+	Email           string    `json:"email" gorm:"unique"`
+	TokenExpiryDate time.Time `json:"token_expiry_date"`
+	// UserPerms       []Permission `json:"permissions" gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	IsAdmin bool `json:"is_admin"`
 	BaseModel
 }
 

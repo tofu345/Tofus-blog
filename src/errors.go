@@ -3,9 +3,9 @@ package src
 import "errors"
 
 var (
-	ObjectNotFound = errors.New("Object not found")
-	InvalidToken   = errors.New("Invalid token")
-	TokenExpired   = errors.New("Token expired")
-	LoginError     = errors.New("Incorrect username or password")
-	Unauthorized   = errors.New("Unauthorized")
+	ErrObjectNotFound = errors.New("object not found")
+	ErrInvalidToken   = errors.New("invalid token")
+	ErrTokenExpired   = errors.New("token expired")
+	ErrLoginError     = errors.New("incorrect username or password")
+	ErrUnauthorized   = errors.New("Unauthorized")
 )

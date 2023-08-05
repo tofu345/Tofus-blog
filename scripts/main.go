@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -37,6 +36,7 @@ func init() {
 
 	err := godotenv.Load(".env")
 	if err != nil {
+		fmt.Println("> This must be ran from project root")
 		log.Fatal(err)
 	}
 }
@@ -62,7 +62,7 @@ func main() {
 			for _, v := range scripts {
 				fmt.Printf("%v\t%v\n", v.name, v.description)
 			}
-		case "e", "exit":
+		case "exit":
 			return
 		default:
 			script, err := getScript(input)
@@ -87,7 +87,7 @@ func getScript(name string) (Script, error) {
 		os.Exit(0)
 	}
 
-	return Script{}, errors.New(fmt.Sprintf("Script '%v' not found", name))
+	return Script{}, fmt.Errorf("Script '%v' not found", name)
 }
 
 func getUserInput(prompt string) string {
@@ -150,10 +150,43 @@ func Fatal(err error) {
 	os.Exit(0)
 }
 
+func getPassword() string {
+	fmt.Print("> Password: ")
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		Fatal(err)
+	}
+	password := string(bytePassword)
+	fmt.Println()
+
+	fmt.Print("> Retype Password: ")
+	bytePassword2, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		Fatal(err)
+	}
+	password2 := string(bytePassword2)
+	fmt.Println()
+
+	if password != password2 {
+		fmt.Println("! Passwords do not match")
+		return getPassword()
+	}
+
+	password, err = src.HashPassword(password)
+	if err != nil {
+		Fatal(err)
+	}
+
+	return password
+}
+
 // Scripts
 func createAdmin() {
 	admins := []src.User{}
-	err := db.Where("is_admin <> ?", "jinzhu").Find(&admins).Error
+	err := db.Where("is_admin <> ?", true).Find(&admins).Error
+	if err != nil {
+		Fatal(err)
+	}
 
 	if len(admins) != 0 {
 		_, err := adminLogin()
@@ -166,20 +199,7 @@ func createAdmin() {
 
 	username := getUserInput("> Username: ")
 	email := getUserInput("> Email: ")
-
-	fmt.Print("> Password: ")
-	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		Fatal(err)
-	}
-	password := string(bytePassword)
-	fmt.Println()
-
-	password, err = src.HashPassword(password)
-	if err != nil {
-		Fatal(err)
-		return
-	}
+	password := getPassword()
 
 	user := src.User{
 		FirstName: username,

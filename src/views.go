@@ -41,7 +41,7 @@ func postDetailView(w http.ResponseWriter, r *http.Request) {
 	post := Post{ID: id}
 	err = db.First(&post).Error
 	if err != nil {
-		RenderErrorPage(w, r, ObjectNotFound, fmt.Sprintf("No post with id %v was found", id))
+		RenderErrorPage(w, r, ErrObjectNotFound, fmt.Sprintf("No post with id %v was found", id))
 		return
 	}
 

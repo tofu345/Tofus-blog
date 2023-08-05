@@ -97,8 +97,9 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !userHasPerm(user, "delete_post") && post.AuthorID != user.ID {
-		JSONError(w, Unauthorized)
+	if post.AuthorID != user.ID {
+		// if !userHasPerm(user, "delete_post") && post.AuthorID != user.ID {
+		JSONError(w, ErrUnauthorized)
 		return
 	}
 
@@ -131,8 +132,9 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !userHasPerm(user, "delete_post") && post.AuthorID != user.ID {
-		JSONError(w, Unauthorized)
+	// if !userHasPerm(user, "delete_post") && post.AuthorID != user.ID {
+	if post.AuthorID != user.ID {
+		JSONError(w, ErrUnauthorized)
 		return
 	}
 
@@ -241,7 +243,7 @@ func userList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !user.IsAdmin {
-		JSONError(w, Unauthorized)
+		JSONError(w, ErrUnauthorized)
 		return
 	}
 
@@ -283,7 +285,7 @@ func getAccessToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !CheckPasswordHash(userData["password"], user.Password) {
-		JSONError(w, LoginError)
+		JSONError(w, ErrLoginError)
 		return
 	}
 
@@ -323,21 +325,21 @@ func refreshAccessToken(w http.ResponseWriter, r *http.Request) {
 
 	if _, exists := payload["ref"]; !exists {
 		fmt.Println(payload)
-		JSONError(w, InvalidToken)
+		JSONError(w, ErrInvalidToken)
 		return
 	}
 
 	username := payload["username"]
 
-	switch username.(type) {
+	switch username := username.(type) {
 	case string:
-		access, err := newAccessToken(username.(string))
+		access, err := newAccessToken(username)
 		if err != nil {
 			JSONError(w, err)
 			return
 		}
 		Response(w, 200, dict{"access": access})
 	default:
-		JSONError(w, InvalidToken)
+		JSONError(w, ErrInvalidToken)
 	}
 }
